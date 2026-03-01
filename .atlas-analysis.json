@@ -1,0 +1,111 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "React ThorVG Fiber",
+  "projectDescription": "A React renderer for ThorVG enabling declarative 2D vector graphics with WebAssembly-powered rendering",
+  "theme": "palm",
+  "primaryColor": "#654FF0",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/canvas-types",
+              "concepts/shapes-and-geometry",
+              "concepts/transforms",
+              "concepts/scenes"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/vite-setup",
+              "guides/nextjs-setup",
+              "guides/wasm-configuration",
+              "guides/performance"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "examples/basic-shapes",
+              "examples/transforms",
+              "examples/custom-paths",
+              "examples/complex-scenes"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Canvas Components",
+            "pages": [
+              "api/sw-canvas",
+              "api/gl-canvas"
+            ]
+          },
+          {
+            "group": "Shape Components",
+            "pages": [
+              "api/shape",
+              "api/rect",
+              "api/circle",
+              "api/path",
+              "api/scene"
+            ]
+          },
+          {
+            "group": "Types & Constants",
+            "pages": [
+              "api/types",
+              "api/constants"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Declarative React API for 2D vector graphics",
+    "WebAssembly-powered ThorVG rendering engine",
+    "Software (Canvas 2D) and hardware-accelerated (WebGL) backends",
+    "Full TypeScript support with comprehensive type definitions",
+    "Framework support for Vite and Next.js",
+    "Shape primitives (rectangles, circles) and custom paths",
+    "Scene graph with transforms and hierarchical composition"
+  ],
+  "publicApiSurface": [
+    "SwCanvas",
+    "GlCanvas",
+    "Shape",
+    "Rect",
+    "Circle",
+    "Path",
+    "Scene",
+    "PathCommand",
+    "FillRule",
+    "StrokeCap",
+    "StrokeJoin",
+    "ShapeProps",
+    "RectProps",
+    "CircleProps",
+    "PathProps",
+    "SceneProps",
+    "Color",
+    "TransformProps"
+  ]
+}
