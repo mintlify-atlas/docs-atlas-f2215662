@@ -1,0 +1,434 @@
+---
+title: Constants
+description: Constant enumerations for React ThorVG Fiber path commands and styling
+---
+
+## PathCommand
+
+Path command constants for defining custom vector paths.
+
+```typescript
+const PathCommand = {
+  Close: 0,
+  MoveTo: 1,
+  LineTo: 2,
+  CubicTo: 3,
+} as const;
+
+type PathCommandType = (typeof PathCommand)[keyof typeof PathCommand];
+```
+
+### Values
+
+<ParamField path="Close" type="0">
+  Closes the current path by drawing a straight line from the current position back to the starting point. Consumes 0 points.
+</ParamField>
+
+<ParamField path="MoveTo" type="1">
+  Moves the current position to a new point without drawing. Consumes 1 point (x, y).
+</ParamField>
+
+<ParamField path="LineTo" type="2">
+  Draws a straight line from the current position to the specified point. Consumes 1 point (x, y).
+</ParamField>
+
+<ParamField path="CubicTo" type="3">
+  Draws a cubic Bézier curve from the current position using two control points and an end point. Consumes 3 points (control1, control2, end).
+</ParamField>
+
+### Usage
+
+<CodeGroup>
+```tsx Triangle Path
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+function Triangle() {
+  return (
+    <Shape fill={[255, 200, 0, 255]}>
+      <Path
+        commands={[
+          PathCommand.MoveTo,  // Move to starting point
+          PathCommand.LineTo,  // Draw to second point
+          PathCommand.LineTo,  // Draw to third point
+          PathCommand.Close,   // Close the triangle
+        ]}
+        points={[
+          { x: 50, y: 10 },   // Starting point
+          { x: 90, y: 80 },   // Second point
+          { x: 10, y: 80 },   // Third point
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Bezier Curve
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+function SmoothCurve() {
+  return (
+    <Shape
+      stroke={[0, 0, 255, 255]}
+      strokeWidth={3}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,   // Start at first point
+          PathCommand.CubicTo,  // Draw curve with 2 control points
+        ]}
+        points={[
+          { x: 10, y: 50 },    // Start point
+          { x: 30, y: 10 },    // First control point
+          { x: 70, y: 90 },    // Second control point
+          { x: 90, y: 50 },    // End point
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Complex Path
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+function ComplexShape() {
+  return (
+    <Shape
+      fill={[100, 200, 150, 255]}
+      stroke={[0, 0, 0, 255]}
+      strokeWidth={2}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.CubicTo,
+          PathCommand.LineTo,
+          PathCommand.Close,
+        ]}
+        points={[
+          { x: 50, y: 20 },
+          { x: 80, y: 50 },
+          { x: 90, y: 60 },  // control 1
+          { x: 90, y: 80 },  // control 2
+          { x: 70, y: 90 },  // end
+          { x: 20, y: 60 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## FillRule
+
+Fill rule constants for determining shape interiors.
+
+```typescript
+const FillRule = {
+  NonZero: 0,
+  EvenOdd: 1,
+} as const;
+
+type FillRuleType = (typeof FillRule)[keyof typeof FillRule];
+```
+
+### Values
+
+<ParamField path="NonZero" type="0">
+  Non-zero winding rule. Determines whether a point is inside the shape by drawing a ray from the point to infinity and counting the number of times the path crosses the ray. If the count is non-zero, the point is inside.
+</ParamField>
+
+<ParamField path="EvenOdd" type="1">
+  Even-odd rule. Determines whether a point is inside the shape by drawing a ray from the point to infinity and counting the crossings. If the count is odd, the point is inside; if even, it's outside.
+</ParamField>
+
+### Usage
+
+<CodeGroup>
+```tsx Non-Zero Fill (Default)
+import { Shape, Path, PathCommand, FillRule } from 'react-thorvg-fiber';
+
+function NonZeroFill() {
+  return (
+    <Shape
+      fill={[255, 100, 100, 255]}
+      fillRule={FillRule.NonZero}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+          PathCommand.Close,
+        ]}
+        points={[
+          { x: 50, y: 10 },
+          { x: 90, y: 90 },
+          { x: 10, y: 40 },
+          { x: 90, y: 40 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Even-Odd Fill
+import { Shape, Path, PathCommand, FillRule } from 'react-thorvg-fiber';
+
+function EvenOddFill() {
+  return (
+    <Shape
+      fill={[100, 100, 255, 255]}
+      fillRule={FillRule.EvenOdd}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+          PathCommand.Close,
+        ]}
+        points={[
+          { x: 50, y: 10 },
+          { x: 90, y: 90 },
+          { x: 10, y: 40 },
+          { x: 90, y: 40 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+<Note>
+  The difference between NonZero and EvenOdd is most visible in self-intersecting paths, where EvenOdd creates "holes" at intersections.
+</Note>
+
+---
+
+## StrokeCap
+
+Stroke cap constants for line endpoint styling.
+
+```typescript
+const StrokeCap = {
+  Butt: 0,
+  Round: 1,
+  Square: 2,
+} as const;
+
+type StrokeCapType = (typeof StrokeCap)[keyof typeof StrokeCap];
+```
+
+### Values
+
+<ParamField path="Butt" type="0">
+  Butt cap - The stroke ends exactly at the endpoint with no extension.
+</ParamField>
+
+<ParamField path="Round" type="1">
+  Round cap - The stroke extends beyond the endpoint with a rounded semicircle whose diameter equals the stroke width.
+</ParamField>
+
+<ParamField path="Square" type="2">
+  Square cap - The stroke extends beyond the endpoint with a square projection whose length equals half the stroke width.
+</ParamField>
+
+### Usage
+
+<CodeGroup>
+```tsx Butt Cap
+import { Shape, Path, PathCommand, StrokeCap } from 'react-thorvg-fiber';
+
+function ButtCapLine() {
+  return (
+    <Shape
+      stroke={[0, 0, 0, 255]}
+      strokeWidth={10}
+      strokeCap={StrokeCap.Butt}
+    >
+      <Path
+        commands={[PathCommand.MoveTo, PathCommand.LineTo]}
+        points={[
+          { x: 20, y: 50 },
+          { x: 80, y: 50 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Round Cap
+import { Shape, Path, PathCommand, StrokeCap } from 'react-thorvg-fiber';
+
+function RoundCapLine() {
+  return (
+    <Shape
+      stroke={[255, 0, 0, 255]}
+      strokeWidth={10}
+      strokeCap={StrokeCap.Round}
+    >
+      <Path
+        commands={[PathCommand.MoveTo, PathCommand.LineTo]}
+        points={[
+          { x: 20, y: 50 },
+          { x: 80, y: 50 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Square Cap
+import { Shape, Path, PathCommand, StrokeCap } from 'react-thorvg-fiber';
+
+function SquareCapLine() {
+  return (
+    <Shape
+      stroke={[0, 0, 255, 255]}
+      strokeWidth={10}
+      strokeCap={StrokeCap.Square}
+    >
+      <Path
+        commands={[PathCommand.MoveTo, PathCommand.LineTo]}
+        points={[
+          { x: 20, y: 50 },
+          { x: 80, y: 50 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## StrokeJoin
+
+Stroke join constants for corner styling where path segments meet.
+
+```typescript
+const StrokeJoin = {
+  Bevel: 0,
+  Round: 1,
+  Miter: 2,
+} as const;
+
+type StrokeJoinType = (typeof StrokeJoin)[keyof typeof StrokeJoin];
+```
+
+### Values
+
+<ParamField path="Bevel" type="0">
+  Bevel join - Corners are cut off with a straight edge connecting the outer corners of the stroke.
+</ParamField>
+
+<ParamField path="Round" type="1">
+  Round join - Corners are rounded with a circular arc connecting the outer corners of the stroke.
+</ParamField>
+
+<ParamField path="Miter" type="2">
+  Miter join - Corners are sharp, with the outer edges extended until they meet. Can be limited by `strokeMiterlimit`.
+</ParamField>
+
+### Usage
+
+<CodeGroup>
+```tsx Bevel Join
+import { Shape, Path, PathCommand, StrokeJoin } from 'react-thorvg-fiber';
+
+function BevelJoinPath() {
+  return (
+    <Shape
+      stroke={[0, 0, 0, 255]}
+      strokeWidth={8}
+      strokeJoin={StrokeJoin.Bevel}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+        ]}
+        points={[
+          { x: 20, y: 80 },
+          { x: 50, y: 20 },
+          { x: 80, y: 80 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Round Join
+import { Shape, Path, PathCommand, StrokeJoin } from 'react-thorvg-fiber';
+
+function RoundJoinPath() {
+  return (
+    <Shape
+      stroke={[255, 0, 0, 255]}
+      strokeWidth={8}
+      strokeJoin={StrokeJoin.Round}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+        ]}
+        points={[
+          { x: 20, y: 80 },
+          { x: 50, y: 20 },
+          { x: 80, y: 80 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Miter Join
+import { Shape, Path, PathCommand, StrokeJoin } from 'react-thorvg-fiber';
+
+function MiterJoinPath() {
+  return (
+    <Shape
+      stroke={[0, 0, 255, 255]}
+      strokeWidth={8}
+      strokeJoin={StrokeJoin.Miter}
+      strokeMiterlimit={4}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+        ]}
+        points={[
+          { x: 20, y: 80 },
+          { x: 50, y: 20 },
+          { x: 80, y: 80 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+<Note>
+  When using `StrokeJoin.Miter`, you can control the maximum miter length with the `strokeMiterlimit` prop (default: 4). If the miter length exceeds this limit, the join is automatically converted to a bevel.
+</Note>

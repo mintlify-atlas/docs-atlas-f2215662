@@ -1,0 +1,177 @@
+---
+title: 'Shape'
+description: '2D vector graphics shape component for rendering visual elements'
+---
+
+The Shape component defines the visual appearance (fill, stroke, opacity) of 2D vector graphics. It must contain geometry children (Rect, Circle, or Path) that define the actual shape to be drawn.
+
+## Props
+
+### Visual Properties
+
+<ParamField path="fill" type="Color">
+  Fill color as RGBA tuple `[R, G, B, A]`, where each component ranges from 0-255.
+  
+  Example: `[255, 0, 0, 255]` for opaque red
+</ParamField>
+
+<ParamField path="stroke" type="Color">
+  Stroke (outline) color as RGBA tuple `[R, G, B, A]`, where each component ranges from 0-255.
+  
+  Example: `[0, 0, 0, 255]` for opaque black
+</ParamField>
+
+<ParamField path="strokeWidth" type="number">
+  Width of the stroke in pixels.
+</ParamField>
+
+<ParamField path="strokeDash" type="number[]">
+  Stroke dash pattern as an array of lengths in pixels.
+  
+  Example: `[5, 10]` creates a 5px dash followed by 10px gap
+</ParamField>
+
+<ParamField path="strokeDashOffset" type="number">
+  Offset for the stroke dash pattern in pixels.
+</ParamField>
+
+<ParamField path="strokeCap" type="StrokeCapType">
+  Cap style for stroke endpoints. Valid values:
+  - `"square"` - Square cap
+  - `"round"` - Rounded cap
+  - `"butt"` - Flat cap (default)
+</ParamField>
+
+<ParamField path="strokeJoin" type="StrokeJoinType">
+  Join style for stroke corners. Valid values:
+  - `"miter"` - Sharp corner (default)
+  - `"round"` - Rounded corner
+  - `"bevel"` - Beveled corner
+</ParamField>
+
+<ParamField path="strokeMiterlimit" type="number" default="4">
+  Miter limit for stroke joins. Controls how sharp miter joins can be before being beveled.
+</ParamField>
+
+<ParamField path="opacity" type="number" default="255">
+  Opacity value from 0 (fully transparent) to 255 (fully opaque).
+</ParamField>
+
+<ParamField path="fillRule" type="FillRuleType">
+  Fill rule for determining the shape interior. Valid values:
+  - `"nonzero"` - Non-zero winding rule (default)
+  - `"evenodd"` - Even-odd rule
+</ParamField>
+
+### Transform Properties
+
+<ParamField path="x" type="number">
+  X-axis translation in pixels.
+</ParamField>
+
+<ParamField path="y" type="number">
+  Y-axis translation in pixels.
+</ParamField>
+
+<ParamField path="rotation" type="number">
+  Rotation angle in degrees.
+</ParamField>
+
+<ParamField path="scaleX" type="number" default="1">
+  Horizontal scale factor.
+</ParamField>
+
+<ParamField path="scaleY" type="number" default="1">
+  Vertical scale factor.
+</ParamField>
+
+## Usage
+
+### Basic Shape with Rectangle
+
+```tsx
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+<Shape fill={[255, 0, 0, 255]}>
+  <Rect x={50} y={50} width={100} height={100} />
+</Shape>
+```
+
+### Shape with Stroke
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape
+  fill={[255, 255, 255, 255]}
+  stroke={[0, 0, 0, 255]}
+  strokeWidth={2}
+>
+  <Circle x={100} y={100} radius={50} />
+</Shape>
+```
+
+### Dashed Stroke
+
+```tsx
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+<Shape
+  stroke={[0, 0, 255, 255]}
+  strokeWidth={3}
+  strokeDash={[10, 5]}
+  strokeCap="round"
+>
+  <Rect x={0} y={0} width={200} height={100} />
+</Shape>
+```
+
+### Transformed Shape
+
+```tsx
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+<Shape
+  fill={[255, 128, 0, 255]}
+  x={100}
+  y={100}
+  rotation={45}
+  scaleX={1.5}
+  scaleY={0.5}
+>
+  <Rect x={0} y={0} width={100} height={100} />
+</Shape>
+```
+
+## Parent-Child Relationships
+
+- **Parent**: Must be a child of [Scene](/api/scene) or SwCanvas/GlCanvas root
+- **Children**: Must contain at least one geometry child:
+  - [Rect](/api/rect) - Rectangle geometry
+  - [Circle](/api/circle) - Circle/ellipse geometry
+  - [Path](/api/path) - Custom path geometry
+
+<Warning>
+  A Shape component without geometry children will not render anything visible.
+</Warning>
+
+## TypeScript Interface
+
+```typescript
+interface ShapeProps extends TransformProps {
+  fill?: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  strokeDash?: number[];
+  strokeDashOffset?: number;
+  strokeCap?: StrokeCapType;
+  strokeJoin?: StrokeJoinType;
+  strokeMiterlimit?: number;
+  opacity?: number;
+  fillRule?: FillRuleType;
+}
+
+type Color = [number, number, number, number];
+```
+
+Source: `packages/fiber/src/types.ts:78-131`

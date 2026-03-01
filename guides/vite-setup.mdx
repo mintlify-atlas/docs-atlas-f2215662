@@ -1,0 +1,216 @@
+---
+title: Vite Setup Guide
+description: Complete guide to setting up React ThorVG Fiber in a Vite project
+---
+
+## Overview
+
+Vite handles WebAssembly files automatically with minimal configuration, making it one of the easiest ways to get started with React ThorVG Fiber. This guide covers everything you need to know to set up and configure ThorVG in your Vite project.
+
+## Installation
+
+<Steps>
+
+### Install Dependencies
+
+First, install React ThorVG Fiber in your Vite project:
+
+```bash
+npm install react-thorvg-fiber
+# or
+pnpm add react-thorvg-fiber
+# or
+yarn add react-thorvg-fiber
+```
+
+### Verify Vite Configuration
+
+Vite requires no special WASM configuration. Your basic `vite.config.ts` should work out of the box:
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+```
+
+### Import WASM Files
+
+Vite provides a special `?url` suffix for importing WASM files as URLs. This is the recommended approach:
+
+<CodeGroup>
+
+```tsx Software Renderer
+import swWasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+```
+
+```tsx WebGL Renderer
+import glWasmUrl from "react-thorvg-fiber/thorvg-gl.wasm?url";
+```
+
+```tsx Both Renderers
+import swWasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+import glWasmUrl from "react-thorvg-fiber/thorvg-gl.wasm?url";
+```
+
+</CodeGroup>
+
+### Create Your First Component
+
+Now you can use the canvas components with the WASM URLs:
+
+<CodeGroup>
+
+```tsx SwCanvas Example
+import { useCallback } from "react";
+import { SwCanvas, Shape, Rect } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+
+function App() {
+  const locateFile = useCallback(() => {
+    return wasmUrl;
+  }, []);
+
+  return (
+    <SwCanvas width={500} height={500} locateFile={locateFile}>
+      <Shape x={250} y={250} fill={[255, 0, 0, 255]}>
+        <Rect x={-50} y={-50} width={100} height={100} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+
+export default App;
+```
+
+```tsx GlCanvas Example
+import { useCallback } from "react";
+import { GlCanvas, Shape, Rect } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-gl.wasm?url";
+
+function App() {
+  const locateFile = useCallback(() => {
+    return wasmUrl;
+  }, []);
+
+  return (
+    <GlCanvas id="my-canvas" width={500} height={500} locateFile={locateFile}>
+      <Shape x={250} y={250} fill={[0, 0, 255, 255]}>
+        <Rect x={-50} y={-50} width={100} height={100} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+
+export default App;
+```
+
+</CodeGroup>
+
+</Steps>
+
+## Advanced Configuration
+
+### TypeScript Configuration
+
+If you're using TypeScript, you may need to add a type declaration for WASM imports. Create a `vite-env.d.ts` file:
+
+```ts
+/// <reference types="vite/client" />
+
+declare module "*.wasm?url" {
+  const content: string;
+  export default content;
+}
+```
+
+### Custom WASM Path
+
+If you need to serve WASM files from a custom path (e.g., CDN), you can modify the `locateFile` function:
+
+```tsx
+const locateFile = useCallback(() => {
+  // Serve from CDN
+  return "https://cdn.example.com/thorvg-sw.wasm";
+}, []);
+```
+
+### Public Directory
+
+Alternatively, you can place WASM files in the `public` directory and reference them directly:
+
+```tsx
+const locateFile = useCallback(() => {
+  return "/wasm/thorvg-sw.wasm";
+}, []);
+```
+
+Note: Copy the WASM files from `node_modules/react-thorvg-fiber/dist/` to your `public/wasm/` directory.
+
+### Build Optimization
+
+Vite automatically handles WASM file chunking and optimization. For production builds, ensure your WASM files are properly included:
+
+```bash
+npm run build
+```
+
+The WASM files will be automatically copied to your `dist` folder with content hashing for cache busting.
+
+## Troubleshooting
+
+### WASM Import Errors
+
+**Problem:** `Cannot find module 'react-thorvg-fiber/thorvg-sw.wasm?url'`
+
+**Solution:** Ensure you're using the `?url` suffix when importing WASM files in Vite:
+
+```tsx
+// ✅ Correct
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+
+// ❌ Incorrect
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+```
+
+### TypeScript Errors
+
+**Problem:** TypeScript doesn't recognize `.wasm?url` imports
+
+**Solution:** Add the type declaration shown in the Advanced Configuration section above.
+
+### Canvas Not Rendering
+
+**Problem:** Canvas appears blank or doesn't render shapes
+
+**Solution:** 
+1. Verify the `locateFile` callback is properly implemented
+2. Check browser console for WASM loading errors
+3. Ensure the WASM URL is accessible (check Network tab in DevTools)
+4. Verify you're using `useCallback` to memoize the `locateFile` function
+
+### Production Build Issues
+
+**Problem:** WASM files not found in production build
+
+**Solution:** 
+1. Run `npm run build` and check the `dist` folder for WASM files
+2. Verify your server is configured to serve `.wasm` files with the correct MIME type (`application/wasm`)
+3. Check that WASM files are not being excluded by your `.gitignore` or build configuration
+
+### Development Server Issues
+
+**Problem:** WASM files fail to load in development
+
+**Solution:**
+1. Restart the Vite dev server: `npm run dev`
+2. Clear browser cache and reload
+3. Check that the WASM import path is correct
+
+## Next Steps
+
+- Learn about [WASM Configuration](/guides/wasm-configuration) for advanced setup
+- Explore [Performance Tips](/guides/performance) to optimize rendering
+- Check out [Examples](/examples/basic-shapes) to see what's possible

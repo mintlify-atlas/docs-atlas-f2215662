@@ -1,0 +1,215 @@
+---
+title: 'Path'
+description: 'Custom path geometry component for defining complex vector shapes'
+---
+
+The Path component defines custom vector path geometry within a Shape using commands and points. It allows you to create complex shapes like bezier curves, polygons, and custom vector graphics. Path must always be a child of a [Shape](/api/shape) component.
+
+## Props
+
+<ParamField path="commands" type="PathCommandType[]" required>
+  Array of path command types defining the operations to perform.
+  
+  Use `PathCommand` constants:
+  - `PathCommand.MoveTo` - Move to a point without drawing
+  - `PathCommand.LineTo` - Draw a line to a point
+  - `PathCommand.CubicTo` - Draw a cubic Bezier curve
+  - `PathCommand.Close` - Close the path
+  
+  Example: `[PathCommand.MoveTo, PathCommand.LineTo, PathCommand.Close]`
+</ParamField>
+
+<ParamField path="points" type="Point[]" required>
+  Array of points corresponding to the commands. Each command consumes a different number of points:
+  
+  - `MoveTo`: 1 point `(x, y)`
+  - `LineTo`: 1 point `(x, y)`
+  - `CubicTo`: 3 points `(x1, y1)`, `(x2, y2)`, `(x, y)` for control points and end point
+  - `Close`: 0 points
+  
+  Example: `[{ x: 0, y: 0 }, { x: 100, y: 100 }]`
+</ParamField>
+
+<Note>
+  The number of points must match the requirements of the commands array. A mismatch will cause rendering errors.
+</Note>
+
+## Usage
+
+### Triangle
+
+```tsx
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<Shape fill={[255, 0, 0, 255]}>
+  <Path
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.Close
+    ]}
+    points={[
+      { x: 100, y: 50 },
+      { x: 150, y: 150 },
+      { x: 50, y: 150 }
+    ]}
+  />
+</Shape>
+```
+
+### Star Shape
+
+```tsx
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<Shape fill={[255, 215, 0, 255]}>
+  <Path
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.Close
+    ]}
+    points={[
+      { x: 100, y: 10 },
+      { x: 120, y: 70 },
+      { x: 180, y: 70 },
+      { x: 130, y: 110 },
+      { x: 150, y: 170 },
+      { x: 100, y: 130 },
+      { x: 50, y: 170 },
+      { x: 70, y: 110 },
+      { x: 20, y: 70 },
+      { x: 80, y: 70 }
+    ]}
+  />
+</Shape>
+```
+
+### Bezier Curve
+
+```tsx
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<Shape
+  stroke={[0, 0, 255, 255]}
+  strokeWidth={2}
+  fill={[255, 255, 255, 0]}
+>
+  <Path
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.CubicTo
+    ]}
+    points={[
+      { x: 50, y: 100 },
+      { x: 100, y: 50 },
+      { x: 150, y: 150 },
+      { x: 200, y: 100 }
+    ]}
+  />
+</Shape>
+```
+
+### Complex Path
+
+```tsx
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<Shape
+  fill={[100, 200, 255, 255]}
+  stroke={[0, 0, 0, 255]}
+  strokeWidth={2}
+>
+  <Path
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.LineTo,
+      PathCommand.CubicTo,
+      PathCommand.LineTo,
+      PathCommand.Close
+    ]}
+    points={[
+      { x: 50, y: 150 },
+      { x: 100, y: 50 },
+      { x: 150, y: 50 },
+      { x: 200, y: 150 },
+      { x: 200, y: 150 },
+      { x: 150, y: 200 }
+    ]}
+  />
+</Shape>
+```
+
+### Open Path (No Fill)
+
+```tsx
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<Shape
+  stroke={[255, 0, 0, 255]}
+  strokeWidth={3}
+  strokeCap="round"
+>
+  <Path
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo
+    ]}
+    points={[
+      { x: 50, y: 100 },
+      { x: 100, y: 50 },
+      { x: 150, y: 100 },
+      { x: 200, y: 50 }
+    ]}
+  />
+</Shape>
+```
+
+## Parent-Child Relationships
+
+- **Parent**: Must be a child of [Shape](/api/shape)
+- **Children**: Path does not accept children
+
+<Warning>
+  A Path component that is not a child of a Shape will not render.
+</Warning>
+
+<Info>
+  All coordinates are relative to the parent Shape's transform. The path matches the `appendPath` API from the ThorVG bindings package.
+</Info>
+
+## Path Commands Reference
+
+| Command | Points Required | Description |
+|---------|----------------|-------------|
+| `PathCommand.MoveTo` | 1 | Move to point without drawing |
+| `PathCommand.LineTo` | 1 | Draw straight line to point |
+| `PathCommand.CubicTo` | 3 | Draw cubic Bezier curve with two control points |
+| `PathCommand.Close` | 0 | Close path to starting point |
+
+## TypeScript Interface
+
+```typescript
+interface PathProps {
+  commands: PathCommandType[];
+  points: Point[];
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+```
+
+Source: `packages/fiber/src/types.ts:205-223`

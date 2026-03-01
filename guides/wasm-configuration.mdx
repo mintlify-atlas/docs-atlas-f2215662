@@ -1,0 +1,483 @@
+---
+title: WASM Configuration
+description: Deep dive into WebAssembly file configuration and the locateFile function
+---
+
+## Overview
+
+React ThorVG Fiber uses WebAssembly (WASM) to provide high-performance vector graphics rendering. Understanding how to properly configure WASM file loading is essential for production deployments.
+
+## The locateFile Function
+
+The `locateFile` function tells the WASM module where to find the `.wasm` binary file. Both `SwCanvas` and `GlCanvas` require this function.
+
+### Basic Usage
+
+```tsx
+import { useCallback } from "react";
+import { SwCanvas } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url"; // Vite
+
+function App() {
+  const locateFile = useCallback(() => {
+    return wasmUrl;
+  }, []);
+
+  return (
+    <SwCanvas width={500} height={500} locateFile={locateFile}>
+      {/* shapes */}
+    </SwCanvas>
+  );
+}
+```
+
+### Function Signature
+
+The `locateFile` prop accepts a function with this signature:
+
+```ts
+type LocateFile = (path: string, prefix: string) => string;
+```
+
+- **path**: The filename being requested (e.g., `"thorvg-sw.wasm"`)
+- **prefix**: The default prefix/directory path
+- **returns**: The full URL or path to the WASM file
+
+### Why useCallback?
+
+Always wrap `locateFile` in `useCallback` to prevent unnecessary re-initialization of the WASM module:
+
+```tsx
+// ✅ Good - memoized, stable reference
+const locateFile = useCallback(() => wasmUrl, []);
+
+// ❌ Bad - new function every render, causes re-initialization
+const locateFile = () => wasmUrl;
+```
+
+## WASM File Locations
+
+React ThorVG Fiber provides two WASM files:
+
+- `thorvg-sw.wasm` - Software renderer (CPU-based)
+- `thorvg-gl.wasm` - WebGL renderer (GPU-based)
+
+### Package Exports
+
+The package exports WASM files through these paths:
+
+```json
+{
+  "exports": {
+    "./thorvg-sw.wasm": "./dist/thorvg-sw.wasm",
+    "./thorvg-gl.wasm": "./dist/thorvg-gl.wasm"
+  }
+}
+```
+
+## Framework-Specific Configuration
+
+### Vite
+
+Vite handles WASM imports automatically with the `?url` suffix:
+
+<CodeGroup>
+
+```tsx Software Renderer
+import { useCallback } from "react";
+import { SwCanvas } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+
+function App() {
+  const locateFile = useCallback(() => wasmUrl, []);
+
+  return <SwCanvas locateFile={locateFile}>{/* ... */}</SwCanvas>;
+}
+```
+
+```tsx WebGL Renderer
+import { useCallback } from "react";
+import { GlCanvas } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-gl.wasm?url";
+
+function App() {
+  const locateFile = useCallback(() => wasmUrl, []);
+
+  return <GlCanvas id="canvas" locateFile={locateFile}>{/* ... */}</GlCanvas>;
+}
+```
+
+</CodeGroup>
+
+Vite will:
+- Copy the WASM file to the build output
+- Generate a hashed filename for cache busting
+- Return the public URL as a string
+
+### Next.js
+
+Next.js requires webpack configuration (see [Next.js Setup Guide](/guides/nextjs-setup)) and imports without `?url`:
+
+<CodeGroup>
+
+```tsx App Router
+"use client";
+
+import { useCallback } from "react";
+import { SwCanvas } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+
+function App() {
+  const locateFile = useCallback(() => wasmUrl, []);
+
+  return <SwCanvas locateFile={locateFile}>{/* ... */}</SwCanvas>;
+}
+```
+
+```tsx Pages Router
+import { useCallback } from "react";
+import { GlCanvas } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-gl.wasm";
+
+export default function Page() {
+  const locateFile = useCallback(() => wasmUrl, []);
+
+  return <GlCanvas id="canvas" locateFile={locateFile}>{/* ... */}</GlCanvas>;
+}
+```
+
+</CodeGroup>
+
+### Other Bundlers
+
+For webpack, Rollup, or other bundlers, you'll need to configure WASM file handling:
+
+```js
+// webpack.config.js
+module.exports = {
+  experiments: {
+    asyncWebAssembly: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: "asset/resource",
+      },
+    ],
+  },
+};
+```
+
+## Advanced Patterns
+
+### CDN Hosting
+
+Host WASM files on a CDN for better caching and performance:
+
+```tsx
+const locateFile = useCallback(() => {
+  return "https://cdn.example.com/thorvg-sw.wasm";
+}, []);
+```
+
+### Environment-Based URLs
+
+Use different WASM sources for development vs. production:
+
+```tsx
+const locateFile = useCallback(() => {
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  return isDev
+    ? wasmUrl // Local bundled version
+    : "https://cdn.example.com/thorvg-sw.wasm"; // CDN version
+}, []);
+```
+
+### Version Pinning
+
+Pin WASM files to specific versions for cache control:
+
+```tsx
+const WASM_VERSION = "0.3.0";
+
+const locateFile = useCallback(() => {
+  return `https://cdn.example.com/thorvg-sw-${WASM_VERSION}.wasm`;
+}, []);
+```
+
+### Dynamic Renderer Selection
+
+Switch between software and WebGL renderers dynamically:
+
+```tsx
+import { useCallback, useState } from "react";
+import { SwCanvas, GlCanvas } from "react-thorvg-fiber";
+import swWasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+import glWasmUrl from "react-thorvg-fiber/thorvg-gl.wasm?url";
+
+function App() {
+  const [useWebGL, setUseWebGL] = useState(true);
+
+  const locateFileSw = useCallback(() => swWasmUrl, []);
+  const locateFileGl = useCallback(() => glWasmUrl, []);
+
+  return (
+    <>
+      <button onClick={() => setUseWebGL(!useWebGL)}>
+        Toggle Renderer
+      </button>
+      
+      {useWebGL ? (
+        <GlCanvas id="canvas" locateFile={locateFileGl}>
+          {/* shapes */}
+        </GlCanvas>
+      ) : (
+        <SwCanvas locateFile={locateFileSw}>
+          {/* shapes */}
+        </SwCanvas>
+      )}
+    </>
+  );
+}
+```
+
+### Lazy Loading
+
+Load WASM files only when needed:
+
+```tsx
+import { useCallback, useState, lazy, Suspense } from "react";
+
+const ThorVGCanvas = lazy(async () => {
+  const { SwCanvas } = await import("react-thorvg-fiber");
+  const wasmUrl = await import("react-thorvg-fiber/thorvg-sw.wasm?url");
+  
+  return {
+    default: function Canvas({ children }: { children: React.ReactNode }) {
+      const locateFile = useCallback(() => wasmUrl.default, []);
+      return <SwCanvas locateFile={locateFile}>{children}</SwCanvas>;
+    },
+  };
+});
+
+function App() {
+  const [show, setShow] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setShow(true)}>Load Canvas</button>
+      {show && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ThorVGCanvas>{/* shapes */}</ThorVGCanvas>
+        </Suspense>
+      )}
+    </>
+  );
+}
+```
+
+### Custom Path Resolution
+
+Implement custom logic for WASM file resolution:
+
+```tsx
+const locateFile = useCallback((path: string, prefix: string) => {
+  // Custom logic based on path
+  if (path.includes('thorvg-sw')) {
+    return '/static/wasm/software-renderer.wasm';
+  }
+  if (path.includes('thorvg-gl')) {
+    return '/static/wasm/webgl-renderer.wasm';
+  }
+  
+  // Fallback to default
+  return prefix + path;
+}, []);
+```
+
+## Public Directory Setup
+
+For static hosting without a bundler:
+
+<Steps>
+
+### Copy WASM Files
+
+```bash
+cp node_modules/react-thorvg-fiber/dist/thorvg-sw.wasm public/
+cp node_modules/react-thorvg-fiber/dist/thorvg-gl.wasm public/
+```
+
+### Reference Public Path
+
+```tsx
+const locateFile = useCallback(() => {
+  return "/thorvg-sw.wasm"; // Served from public directory
+}, []);
+```
+
+### Configure Build Script
+
+Automate copying in `package.json`:
+
+```json
+{
+  "scripts": {
+    "prebuild": "cp node_modules/react-thorvg-fiber/dist/*.wasm public/",
+    "build": "vite build"
+  }
+}
+```
+
+</Steps>
+
+## MIME Type Configuration
+
+Ensure your server sends WASM files with the correct MIME type:
+
+### Vercel
+
+Vercel usually handles this automatically. If needed, add to `vercel.json`:
+
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*).wasm",
+      "headers": [
+        { "key": "Content-Type", "value": "application/wasm" }
+      ]
+    }
+  ]
+}
+```
+
+### Netlify
+
+Add to `netlify.toml`:
+
+```toml
+[[headers]]
+  for = "/*.wasm"
+  [headers.values]
+    Content-Type = "application/wasm"
+```
+
+### Apache
+
+Add to `.htaccess`:
+
+```apache
+AddType application/wasm .wasm
+```
+
+### Nginx
+
+Add to your server config:
+
+```nginx
+types {
+    application/wasm wasm;
+}
+```
+
+## Performance Considerations
+
+### Caching
+
+WASM files are relatively large (~2-3 MB). Implement aggressive caching:
+
+```tsx
+// Use versioned URLs for long-term caching
+const locateFile = useCallback(() => {
+  return `/wasm/thorvg-sw.${__BUILD_VERSION__}.wasm`;
+}, []);
+```
+
+### Preloading
+
+Preload WASM files for faster initialization:
+
+```html
+<link rel="preload" href="/thorvg-sw.wasm" as="fetch" type="application/wasm" crossorigin>
+```
+
+Or in React:
+
+```tsx
+import { useEffect } from "react";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+
+function App() {
+  useEffect(() => {
+    // Preload WASM file
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.href = wasmUrl;
+    link.as = 'fetch';
+    link.type = 'application/wasm';
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  }, []);
+
+  // ...
+}
+```
+
+### Compression
+
+Enable compression for WASM files. Most hosting providers support this automatically, but verify:
+
+- Brotli compression typically reduces WASM files by 60-70%
+- Gzip compression reduces by 50-60%
+
+## Troubleshooting
+
+### WASM File Not Found
+
+**Problem:** `Failed to fetch WASM file`
+
+**Solutions:**
+1. Verify the URL returned by `locateFile` is correct
+2. Check browser DevTools Network tab for the actual request
+3. Ensure WASM files are included in your build output
+4. Check file paths and server configuration
+
+### MIME Type Errors
+
+**Problem:** `Incorrect MIME type for WASM file`
+
+**Solutions:**
+1. Configure your server to serve `.wasm` files with `application/wasm` MIME type
+2. Check response headers in browser DevTools
+3. See MIME Type Configuration section above
+
+### Module Initialization Failed
+
+**Problem:** `RuntimeError: abort(CompileError: WebAssembly.instantiate())`
+
+**Solutions:**
+1. Ensure the WASM file is not corrupted
+2. Verify the file is served with correct MIME type
+3. Check browser console for detailed error messages
+4. Try re-downloading/re-building the WASM file
+
+### CORS Errors
+
+**Problem:** `CORS policy blocked loading WASM from CDN`
+
+**Solutions:**
+1. Add CORS headers to your CDN/server:
+   ```
+   Access-Control-Allow-Origin: *
+   ```
+2. Or use same-origin hosting
+3. Add `crossorigin="anonymous"` to preload links
+
+## Next Steps
+
+- Learn about [Vite Setup](/guides/vite-setup) for detailed Vite configuration
+- Learn about [Next.js Setup](/guides/nextjs-setup) for detailed Next.js configuration
+- Explore [Performance Tips](/guides/performance) for optimization strategies

@@ -1,0 +1,384 @@
+---
+title: Custom Paths
+description: Examples using the Path component with PathCommand to create custom shapes
+---
+
+## Simple Line
+
+Create a line using `MoveTo` and `LineTo` commands.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape stroke={[234, 88, 12, 255]} strokeWidth={8}>
+    <Path
+      commands={[PathCommand.MoveTo, PathCommand.LineTo]}
+      points={[
+        { x: 50, y: 50 },
+        { x: 150, y: 150 }
+      ]}
+    />
+  </Shape>
+</SwCanvas>
+```
+
+This draws a diagonal line from (50, 50) to (150, 150).
+
+## Path Commands
+
+The `Path` component supports these command types:
+
+- `PathCommand.MoveTo` - Move to a point without drawing (requires 1 point)
+- `PathCommand.LineTo` - Draw a line to a point (requires 1 point)
+- `PathCommand.CubicTo` - Draw a cubic Bezier curve (requires 3 points: two control points and an end point)
+- `PathCommand.Close` - Close the path by drawing a line to the first point (requires 0 points)
+
+## Polyline
+
+Create connected lines forming a shape.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[59, 130, 246, 255]} stroke={[234, 88, 12, 255]} strokeWidth={4}>
+    <Path
+      commands={[
+        PathCommand.MoveTo,
+        PathCommand.LineTo,
+        PathCommand.LineTo,
+        PathCommand.LineTo,
+        PathCommand.Close
+      ]}
+      points={[
+        { x: 100, y: 40 },
+        { x: 160, y: 100 },
+        { x: 120, y: 160 },
+        { x: 40, y: 100 }
+      ]}
+    />
+  </Shape>
+</SwCanvas>
+```
+
+This creates a diamond shape by connecting four points and closing the path.
+
+## Cubic Bezier Curve
+
+Create smooth curves using the `CubicTo` command.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape stroke={[234, 88, 12, 255]} strokeWidth={8}>
+    <Path
+      commands={[PathCommand.MoveTo, PathCommand.CubicTo]}
+      points={[
+        { x: 30, y: 100 },
+        { x: 70, y: 30 },
+        { x: 130, y: 170 },
+        { x: 170, y: 100 }
+      ]}
+    />
+  </Shape>
+</SwCanvas>
+```
+
+The `CubicTo` command takes three points:
+1. First control point (x: 70, y: 30)
+2. Second control point (x: 130, y: 170)
+3. End point (x: 170, y: 100)
+
+## Complex Path
+
+Combine multiple commands to create complex shapes.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[34, 197, 94, 255]} stroke={[234, 88, 12, 255]} strokeWidth={6}>
+    <Path
+      commands={[
+        PathCommand.MoveTo,
+        PathCommand.LineTo,
+        PathCommand.CubicTo,
+        PathCommand.LineTo,
+        PathCommand.Close
+      ]}
+      points={[
+        { x: 100, y: 30 },
+        { x: 170, y: 80 },
+        { x: 180, y: 120 },
+        { x: 140, y: 160 },
+        { x: 100, y: 170 },
+        { x: 30, y: 100 }
+      ]}
+    />
+  </Path>
+</SwCanvas>
+```
+
+This creates a custom shape mixing straight lines and curves.
+
+## Star Shape
+
+Create a star using calculated points.
+
+<Tabs items={['5-Point Star', '8-Point Star']}>
+  <Tab value="5-Point Star">
+    ```tsx
+    import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 179, 8, 255]} stroke={[234, 88, 12, 255]} strokeWidth={3}>
+        <Path
+          commands={[
+            PathCommand.MoveTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.Close
+          ]}
+          points={[
+            { x: 100, y: 20 },
+            { x: 115, y: 70 },
+            { x: 165, y: 70 },
+            { x: 125, y: 100 },
+            { x: 140, y: 150 },
+            { x: 100, y: 120 },
+            { x: 60, y: 150 },
+            { x: 75, y: 100 },
+            { x: 35, y: 70 },
+            { x: 85, y: 70 }
+          ]}
+        />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    A classic 5-point star shape.
+  </Tab>
+  
+  <Tab value="8-Point Star">
+    ```tsx
+    import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[168, 85, 247, 255]} stroke={[139, 92, 246, 255]} strokeWidth={3}>
+        <Path
+          commands={[
+            PathCommand.MoveTo,
+            ...Array(15).fill(PathCommand.LineTo),
+            PathCommand.Close
+          ]}
+          points={[
+            { x: 100, y: 20 },
+            { x: 108, y: 52 },
+            { x: 140, y: 44 },
+            { x: 120, y: 72 },
+            { x: 148, y: 92 },
+            { x: 116, y: 100 },
+            { x: 148, y: 108 },
+            { x: 120, y: 128 },
+            { x: 140, y: 156 },
+            { x: 108, y: 148 },
+            { x: 100, y: 180 },
+            { x: 92, y: 148 },
+            { x: 60, y: 156 },
+            { x: 80, y: 128 },
+            { x: 52, y: 108 },
+            { x: 84, y: 100 },
+            { x: 52, y: 92 },
+            { x: 80, y: 72 },
+            { x: 60, y: 44 },
+            { x: 92, y: 52 }
+          ]}
+        />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    An 8-point star with alternating inner and outer points.
+  </Tab>
+</Tabs>
+
+## Heart Shape
+
+Create a heart using Bezier curves.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[239, 68, 68, 255]}>
+    <Path
+      commands={[
+        PathCommand.MoveTo,
+        PathCommand.CubicTo,
+        PathCommand.CubicTo,
+        PathCommand.CubicTo,
+        PathCommand.CubicTo,
+        PathCommand.Close
+      ]}
+      points={[
+        { x: 100, y: 160 },
+        { x: 50, y: 130 },
+        { x: 40, y: 90 },
+        { x: 60, y: 70 },
+        { x: 80, y: 65 },
+        { x: 100, y: 80 },
+        { x: 100, y: 80 },
+        { x: 120, y: 65 },
+        { x: 140, y: 70 },
+        { x: 160, y: 70 },
+        { x: 160, y: 90 },
+        { x: 150, y: 130 },
+        { x: 100, y: 160 }
+      ]}
+    />
+  </Shape>
+</SwCanvas>
+```
+
+## Wave Pattern
+
+Create a wave using multiple Bezier curves.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape stroke={[59, 130, 246, 255]} strokeWidth={6}>
+    <Path
+      commands={[
+        PathCommand.MoveTo,
+        PathCommand.CubicTo,
+        PathCommand.CubicTo,
+        PathCommand.CubicTo
+      ]}
+      points={[
+        { x: 20, y: 100 },
+        { x: 40, y: 60 },
+        { x: 60, y: 140 },
+        { x: 80, y: 100 },
+        { x: 100, y: 60 },
+        { x: 120, y: 140 },
+        { x: 140, y: 100 },
+        { x: 160, y: 60 },
+        { x: 180, y: 140 },
+        { x: 200, y: 100 }
+      ]}
+    />
+  </Shape>
+</SwCanvas>
+```
+
+## Fill Rules
+
+Control how self-intersecting paths are filled using the `fillRule` prop.
+
+<Tabs items={['Winding (default)', 'EvenOdd']}>
+  <Tab value="Winding (default)">
+    ```tsx
+    import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]} fillRule="Winding">
+        <Path
+          commands={[
+            PathCommand.MoveTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.Close
+          ]}
+          points={[
+            { x: 100, y: 30 },
+            { x: 150, y: 150 },
+            { x: 30, y: 80 },
+            { x: 170, y: 80 },
+            { x: 50, y: 150 }
+          ]}
+        />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    With the default "Winding" fill rule, the entire star is filled.
+  </Tab>
+  
+  <Tab value="EvenOdd">
+    ```tsx
+    import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]} fillRule="EvenOdd">
+        <Path
+          commands={[
+            PathCommand.MoveTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.LineTo,
+            PathCommand.Close
+          ]}
+          points={[
+            { x: 100, y: 30 },
+            { x: 150, y: 150 },
+            { x: 30, y: 80 },
+            { x: 170, y: 80 },
+            { x: 50, y: 150 }
+          ]}
+        />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    With "EvenOdd" fill rule, the center of the star is hollow where paths intersect.
+  </Tab>
+</Tabs>
+
+## Combining Paths with Transforms
+
+Paths can be transformed like any other shape.
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape
+    fill={[34, 197, 94, 255]}
+    x={100}
+    y={100}
+    rotation={45}
+    scaleX={1.2}
+  >
+    <Path
+      commands={[
+        PathCommand.MoveTo,
+        PathCommand.LineTo,
+        PathCommand.LineTo,
+        PathCommand.LineTo,
+        PathCommand.Close
+      ]}
+      points={[
+        { x: 0, y: -40 },
+        { x: 40, y: 40 },
+        { x: -40, y: 40 }
+      ]}
+    />
+  </Shape>
+</SwCanvas>
+```
+
+This creates a triangle that's rotated 45 degrees and scaled horizontally by 1.2x.

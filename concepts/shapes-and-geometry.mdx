@@ -1,0 +1,321 @@
+---
+title: Shapes and Geometry
+description: Understanding the Shape component and its geometry children
+---
+
+In React ThorVG Fiber, shapes are composed of two parts: a `Shape` component that defines visual properties (fill, stroke, transforms) and geometry children (`Rect`, `Circle`, `Path`) that define what to draw.
+
+## The Shape Component
+
+The `Shape` component is a container that holds visual properties and must contain geometry children to be rendered.
+
+```tsx
+import { SwCanvas, Shape, Rect } from '@thorvg/react-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={800} height={600}>
+      <Shape 
+        fill={[255, 100, 100, 255]}
+        stroke={[0, 0, 0, 255]}
+        strokeWidth={2}
+      >
+        <Rect x={100} y={100} width={200} height={150} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+### Shape Props
+
+See the complete reference in the type definitions in the source code.
+
+<ParamField path="fill" type="Color" default="undefined">
+  Fill color as RGBA tuple `[R, G, B, A]`. Each component is 0-255.
+  
+  ```tsx
+  <Shape fill={[255, 0, 0, 255]}> // Red
+  ```
+</ParamField>
+
+<ParamField path="stroke" type="Color" default="undefined">
+  Stroke color as RGBA tuple `[R, G, B, A]`.
+  
+  ```tsx
+  <Shape stroke={[0, 0, 0, 255]} strokeWidth={3}>
+  ```
+</ParamField>
+
+<ParamField path="strokeWidth" type="number" default="0">
+  Width of the stroke in pixels.
+</ParamField>
+
+<ParamField path="strokeDash" type="number[]" default="undefined">
+  Stroke dash pattern as an array of lengths.
+  
+  ```tsx
+  <Shape stroke={[0,0,0,255]} strokeWidth={2} strokeDash={[5, 10]}>
+  ```
+</ParamField>
+
+<ParamField path="strokeDashOffset" type="number" default="0">
+  Offset for stroke dash pattern in pixels.
+</ParamField>
+
+<ParamField path="strokeCap" type="StrokeCapType" default="undefined">
+  Cap style for stroke endpoints (`'butt'`, `'round'`, `'square'`).
+</ParamField>
+
+<ParamField path="strokeJoin" type="StrokeJoinType" default="undefined">
+  Join style for stroke corners (`'miter'`, `'round'`, `'bevel'`).
+</ParamField>
+
+<ParamField path="strokeMiterlimit" type="number" default="4">
+  Miter limit for stroke joins.
+</ParamField>
+
+<ParamField path="opacity" type="number" default="255">
+  Opacity value from 0 (transparent) to 255 (opaque).
+</ParamField>
+
+<ParamField path="fillRule" type="FillRuleType" default="undefined">
+  Fill rule for determining shape interior (`'nonzero'` or `'evenodd'`).
+</ParamField>
+
+<Note>
+Shapes also support transform props (`x`, `y`, `rotation`, `scaleX`, `scaleY`). See [Transforms](/concepts/transforms) for details.
+</Note>
+
+## Geometry Children
+
+Geometry children define the actual shape to be drawn. A `Shape` can contain one or more geometry children.
+
+### Rect (Rectangle)
+
+Defines a rectangle or rounded rectangle.
+
+```tsx
+<Shape fill={[100, 150, 200, 255]}>
+  <Rect x={50} y={50} width={200} height={100} />
+</Shape>
+```
+
+#### Rect Props
+
+<ParamField path="x" type="number" required>
+  X-coordinate of the rectangle's top-left corner.
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y-coordinate of the rectangle's top-left corner.
+</ParamField>
+
+<ParamField path="width" type="number" required>
+  Width of the rectangle in pixels.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the rectangle in pixels.
+</ParamField>
+
+<ParamField path="rx" type="number" default="0">
+  Horizontal corner radius for rounded rectangles.
+</ParamField>
+
+<ParamField path="ry" type="number" default="0">
+  Vertical corner radius for rounded rectangles.
+</ParamField>
+
+#### Rounded Rectangle Example
+
+```tsx
+<Shape fill={[255, 200, 100, 255]}>
+  <Rect x={100} y={100} width={150} height={100} rx={10} ry={10} />
+</Shape>
+```
+
+### Circle (Circle/Ellipse)
+
+Defines a circle or ellipse.
+
+```tsx
+<Shape fill={[200, 100, 255, 255]}>
+  <Circle x={200} y={150} radius={50} />
+</Shape>
+```
+
+#### Circle Props
+
+<ParamField path="x" type="number" required>
+  X-coordinate of the circle's center.
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y-coordinate of the circle's center.
+</ParamField>
+
+<ParamField path="radius" type="number" default="undefined">
+  Radius for a perfect circle. If specified, both radii will use this value.
+</ParamField>
+
+<ParamField path="rx" type="number" default="undefined">
+  Horizontal radius for an ellipse.
+</ParamField>
+
+<ParamField path="ry" type="number" default="undefined">
+  Vertical radius for an ellipse.
+</ParamField>
+
+#### Ellipse Example
+
+```tsx
+<Shape stroke={[0, 0, 0, 255]} strokeWidth={2}>
+  <Circle x={150} y={100} rx={80} ry={50} />
+</Shape>
+```
+
+### Path (Custom Shapes)
+
+Defines custom shapes using path commands similar to SVG paths.
+
+```tsx
+import { PathCommand } from '@thorvg/react-fiber';
+
+<Shape fill={[100, 200, 100, 255]}>
+  <Path 
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.LineTo,
+      PathCommand.LineTo,
+      PathCommand.Close
+    ]}
+    points={[
+      { x: 100, y: 50 },   // Move to
+      { x: 150, y: 150 },  // Line to
+      { x: 50, y: 150 }    // Line to
+    ]}
+  />
+</Shape>
+```
+
+#### Path Props
+
+<ParamField path="commands" type="PathCommandType[]" required>
+  Array of path command types. Use `PathCommand` constants:
+  - `PathCommand.MoveTo` - Move to a point (1 point)
+  - `PathCommand.LineTo` - Draw line to a point (1 point)
+  - `PathCommand.CubicTo` - Draw cubic bezier curve (3 points)
+  - `PathCommand.Close` - Close the path (0 points)
+</ParamField>
+
+<ParamField path="points" type="Point[]" required>
+  Array of points corresponding to the commands. Each point is `{ x: number, y: number }`.
+</ParamField>
+
+#### Bezier Curve Example
+
+```tsx
+import { PathCommand } from '@thorvg/react-fiber';
+
+<Shape fill={[255, 150, 50, 255]}>
+  <Path 
+    commands={[
+      PathCommand.MoveTo,
+      PathCommand.CubicTo,
+      PathCommand.Close
+    ]}
+    points={[
+      { x: 50, y: 100 },    // Start point
+      { x: 100, y: 50 },    // Control point 1
+      { x: 150, y: 50 },    // Control point 2
+      { x: 200, y: 100 }    // End point
+    ]}
+  />
+</Shape>
+```
+
+## Multiple Geometry Children
+
+A single `Shape` can contain multiple geometry children, which will be rendered together with the same visual properties.
+
+```tsx
+<Shape 
+  fill={[100, 100, 255, 255]}
+  stroke={[255, 255, 255, 255]}
+  strokeWidth={2}
+>
+  <Rect x={50} y={50} width={100} height={100} />
+  <Circle x={100} y={100} radius={30} />
+  <Rect x={120} y={120} width={50} height={50} rx={5} ry={5} />
+</Shape>
+```
+
+<Tip>
+All geometry children within a Shape share the same fill, stroke, and transform properties. This is efficient for rendering complex shapes with consistent styling.
+</Tip>
+
+## Dynamic Geometry
+
+Geometry children can be dynamically added, removed, or reordered:
+
+```tsx
+import { useState } from 'react';
+import { SwCanvas, Shape, Rect, Circle } from '@thorvg/react-fiber';
+
+function DynamicShape() {
+  const [showCircle, setShowCircle] = useState(true);
+
+  return (
+    <SwCanvas width={400} height={300}>
+      <Shape fill={[200, 100, 150, 255]}>
+        <Rect x={50} y={50} width={100} height={100} />
+        {showCircle && <Circle x={150} y={150} radius={40} />}
+      </Shape>
+      <button onClick={() => setShowCircle(!showCircle)}>
+        Toggle Circle
+      </button>
+    </SwCanvas>
+  );
+}
+```
+
+<Warning>
+Geometry children (`Rect`, `Circle`, `Path`) **must** be direct children of a `Shape` component. They cannot be rendered on their own or as children of other components.
+</Warning>
+
+## Common Patterns
+
+<CodeGroup>
+```tsx Solid Shapes
+<Shape fill={[255, 0, 0, 255]}>
+  <Rect x={0} y={0} width={100} height={100} />
+</Shape>
+```
+
+```tsx Outlined Shapes
+<Shape stroke={[0, 0, 0, 255]} strokeWidth={3}>
+  <Circle x={100} y={100} radius={50} />
+</Shape>
+```
+
+```tsx Filled with Outline
+<Shape 
+  fill={[255, 200, 100, 255]}
+  stroke={[100, 50, 0, 255]}
+  strokeWidth={2}
+>
+  <Rect x={50} y={50} width={150} height={100} rx={10} ry={10} />
+</Shape>
+```
+
+```tsx Dashed Stroke
+<Shape 
+  stroke={[0, 0, 255, 255]}
+  strokeWidth={2}
+  strokeDash={[10, 5]}
+>
+  <Circle x={100} y={100} radius={60} />
+</Shape>
+```
+</CodeGroup>

@@ -1,0 +1,221 @@
+---
+title: 'Scene'
+description: 'Container component for grouping and transforming shapes'
+---
+
+The Scene component acts as a container for grouping multiple shapes and applying transformations to them as a unit. Scenes can contain [Shape](/api/shape) children or other nested Scenes, enabling hierarchical organization of complex graphics.
+
+## Props
+
+### Transform Properties
+
+<ParamField path="x" type="number">
+  X-axis translation in pixels. Offsets all children horizontally.
+</ParamField>
+
+<ParamField path="y" type="number">
+  Y-axis translation in pixels. Offsets all children vertically.
+</ParamField>
+
+<ParamField path="rotation" type="number">
+  Rotation angle in degrees. Rotates all children around the origin.
+</ParamField>
+
+<ParamField path="scaleX" type="number" default="1">
+  Horizontal scale factor. Scales all children horizontally.
+</ParamField>
+
+<ParamField path="scaleY" type="number" default="1">
+  Vertical scale factor. Scales all children vertically.
+</ParamField>
+
+### Visual Properties
+
+<ParamField path="opacity" type="number" default="255">
+  Opacity value from 0 (fully transparent) to 255 (fully opaque). Affects all children.
+</ParamField>
+
+## Usage
+
+### Basic Scene with Multiple Shapes
+
+```tsx
+import { Scene, Shape, Rect, Circle } from 'react-thorvg-fiber';
+
+<Scene>
+  <Shape fill={[255, 0, 0, 255]}>
+    <Rect x={10} y={10} width={50} height={50} />
+  </Shape>
+  <Shape fill={[0, 0, 255, 255]}>
+    <Circle x={100} y={35} radius={25} />
+  </Shape>
+</Scene>
+```
+
+### Transformed Scene
+
+```tsx
+import { Scene, Shape, Rect } from 'react-thorvg-fiber';
+
+<Scene x={100} y={100} rotation={45}>
+  <Shape fill={[255, 128, 0, 255]}>
+    <Rect x={0} y={0} width={100} height={100} />
+  </Shape>
+  <Shape fill={[0, 255, 128, 255]}>
+    <Rect x={10} y={10} width={80} height={80} />
+  </Shape>
+</Scene>
+```
+
+### Scene with Opacity
+
+```tsx
+import { Scene, Shape, Circle } from 'react-thorvg-fiber';
+
+<Scene opacity={128}>
+  <Shape fill={[255, 0, 0, 255]}>
+    <Circle x={100} y={100} radius={50} />
+  </Shape>
+  <Shape fill={[0, 0, 255, 255]}>
+    <Circle x={150} y={100} radius={50} />
+  </Shape>
+</Scene>
+```
+
+### Nested Scenes
+
+```tsx
+import { Scene, Shape, Rect } from 'react-thorvg-fiber';
+
+<Scene x={50} y={50}>
+  <Shape fill={[200, 200, 200, 255]}>
+    <Rect x={0} y={0} width={200} height={200} />
+  </Shape>
+  
+  <Scene x={25} y={25} rotation={15}>
+    <Shape fill={[255, 0, 0, 255]}>
+      <Rect x={0} y={0} width={150} height={150} />
+    </Shape>
+    
+    <Scene x={25} y={25} rotation={15}>
+      <Shape fill={[0, 0, 255, 255]}>
+        <Rect x={0} y={0} width={100} height={100} />
+      </Shape>
+    </Scene>
+  </Scene>
+</Scene>
+```
+
+### Scaled Scene
+
+```tsx
+import { Scene, Shape, Circle } from 'react-thorvg-fiber';
+
+<Scene scaleX={1.5} scaleY={0.5}>
+  <Shape fill={[0, 255, 0, 255]}>
+    <Circle x={100} y={100} radius={50} />
+  </Shape>
+</Scene>
+```
+
+### Scene Group Animation Container
+
+```tsx
+import { Scene, Shape, Rect } from 'react-thorvg-fiber';
+import { useState, useEffect } from 'react';
+
+function AnimatedGroup() {
+  const [rotation, setRotation] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotation(r => (r + 1) % 360);
+    }, 16);
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <Scene x={150} y={150} rotation={rotation}>
+      <Shape fill={[255, 0, 0, 255]}>
+        <Rect x={-25} y={-50} width={50} height={100} />
+      </Shape>
+      <Shape fill={[0, 0, 255, 255]}>
+        <Rect x={-50} y={-25} width={100} height={50} />
+      </Shape>
+    </Scene>
+  );
+}
+```
+
+## Parent-Child Relationships
+
+- **Parent**: Must be a child of SwCanvas, GlCanvas, or another Scene
+- **Children**: Can contain:
+  - [Shape](/api/shape) components
+  - Other Scene components (for nesting)
+
+<Info>
+  Transforms applied to a Scene are cumulative with any parent Scene transforms. If a parent Scene has `rotation={30}` and a child Scene has `rotation={15}`, the child will be rotated 45 degrees total.
+</Info>
+
+<Tip>
+  Use Scenes to organize complex graphics hierarchies, group related shapes together, and apply transformations to multiple elements at once.
+</Tip>
+
+## Use Cases
+
+### Organizing Complex Graphics
+
+Group related shapes together for better code organization:
+
+```tsx
+<Scene>
+  {/* Background elements */}
+  <Shape fill={[240, 240, 240, 255]}>
+    <Rect x={0} y={0} width={800} height={600} />
+  </Shape>
+  
+  {/* Foreground content */}
+  <Scene x={100} y={100}>
+    {/* ... */}
+  </Scene>
+</Scene>
+```
+
+### Applying Group Transformations
+
+Transform multiple shapes as a unit:
+
+```tsx
+<Scene x={centerX} y={centerY} rotation={angle} scaleX={zoom} scaleY={zoom}>
+  {/* All children inherit these transforms */}
+</Scene>
+```
+
+### Managing Layer Opacity
+
+Control visibility of entire layers:
+
+```tsx
+<Scene opacity={isVisible ? 255 : 0}>
+  {/* All children inherit opacity */}
+</Scene>
+```
+
+## TypeScript Interface
+
+```typescript
+interface SceneProps extends TransformProps {
+  opacity?: number;
+}
+
+interface TransformProps {
+  x?: number;
+  y?: number;
+  rotation?: number;
+  scaleX?: number;
+  scaleY?: number;
+}
+```
+
+Source: `packages/fiber/src/types.ts:229-235`

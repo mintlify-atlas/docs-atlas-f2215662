@@ -1,0 +1,416 @@
+---
+title: Next.js Setup Guide
+description: Complete guide to setting up React ThorVG Fiber in a Next.js project
+---
+
+## Overview
+
+Next.js requires additional webpack configuration to properly handle WebAssembly files. This guide provides complete, copy-paste ready configuration for both the App Router and Pages Router.
+
+## Installation
+
+<Steps>
+
+### Install Dependencies
+
+Install React ThorVG Fiber in your Next.js project:
+
+```bash
+npm install react-thorvg-fiber
+# or
+pnpm add react-thorvg-fiber
+# or
+yarn add react-thorvg-fiber
+```
+
+### Configure Webpack
+
+Next.js needs webpack configuration to handle WASM files. Add this to your `next.config.mjs`:
+
+<CodeGroup>
+
+```js Complete Configuration
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+  webpack: (config) => {
+    // Enable WebAssembly support
+    config.experiments = { 
+      ...config.experiments, 
+      asyncWebAssembly: true 
+    };
+
+    // Handle WASM files as assets
+    config.module.rules.push({
+      test: /\.wasm$/,
+      type: "asset/resource",
+    });
+
+    // Don't parse Emscripten loader files - they use import.meta.url
+    config.module.rules.push({
+      test: /thorvg-.*-loader\.js$/,
+      type: "javascript/auto",
+      parser: {
+        url: false,
+      },
+    });
+
+    return config;
+  },
+};
+
+export default config;
+```
+
+```js With MDX (Fumadocs/Nextra)
+import { createMDX } from "fumadocs-mdx/next";
+// or for Nextra:
+// import nextra from 'nextra'
+
+const withMDX = createMDX();
+// or for Nextra:
+// const withMDX = nextra({ ... })
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+  webpack: (config) => {
+    // Enable WebAssembly support
+    config.experiments = { 
+      ...config.experiments, 
+      asyncWebAssembly: true 
+    };
+
+    // Handle WASM files as assets
+    config.module.rules.push({
+      test: /\.wasm$/,
+      type: "asset/resource",
+    });
+
+    // Don't parse Emscripten loader files
+    config.module.rules.push({
+      test: /thorvg-.*-loader\.js$/,
+      type: "javascript/auto",
+      parser: {
+        url: false,
+      },
+    });
+
+    return config;
+  },
+};
+
+export default withMDX(config);
+```
+
+```js TypeScript (next.config.ts)
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
+  reactStrictMode: true,
+  webpack: (config) => {
+    // Enable WebAssembly support
+    config.experiments = { 
+      ...config.experiments, 
+      asyncWebAssembly: true 
+    };
+
+    // Handle WASM files as assets
+    config.module.rules.push({
+      test: /\.wasm$/,
+      type: "asset/resource",
+    });
+
+    // Don't parse Emscripten loader files
+    config.module.rules.push({
+      test: /thorvg-.*-loader\.js$/,
+      type: "javascript/auto",
+      parser: {
+        url: false,
+      },
+    });
+
+    return config;
+  },
+};
+
+export default config;
+```
+
+</CodeGroup>
+
+### Import WASM Files
+
+In Next.js, import WASM files **without** the `?url` suffix:
+
+<CodeGroup>
+
+```tsx Software Renderer
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+```
+
+```tsx WebGL Renderer
+import wasmUrl from "react-thorvg-fiber/thorvg-gl.wasm";
+```
+
+```tsx Both Renderers
+import swWasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+import glWasmUrl from "react-thorvg-fiber/thorvg-gl.wasm";
+```
+
+</CodeGroup>
+
+### Create a Client Component
+
+ThorVG components must run on the client side. Use the `"use client"` directive:
+
+<CodeGroup>
+
+```tsx App Router (app/page.tsx)
+"use client";
+
+import { useCallback } from "react";
+import { SwCanvas, Shape, Rect } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+
+export default function Home() {
+  const locateFile = useCallback(() => {
+    return wasmUrl;
+  }, []);
+
+  return (
+    <main>
+      <h1>React ThorVG Fiber</h1>
+      <SwCanvas width={500} height={500} locateFile={locateFile}>
+        <Shape x={250} y={250} fill={[255, 0, 0, 255]}>
+          <Rect x={-50} y={-50} width={100} height={100} />
+        </Shape>
+      </SwCanvas>
+    </main>
+  );
+}
+```
+
+```tsx Pages Router (pages/index.tsx)
+import { useCallback } from "react";
+import { SwCanvas, Shape, Rect } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+
+export default function Home() {
+  const locateFile = useCallback(() => {
+    return wasmUrl;
+  }, []);
+
+  return (
+    <main>
+      <h1>React ThorVG Fiber</h1>
+      <SwCanvas width={500} height={500} locateFile={locateFile}>
+        <Shape x={250} y={250} fill={[255, 0, 0, 255]}>
+          <Rect x={-50} y={-50} width={100} height={100} />
+        </Shape>
+      </SwCanvas>
+    </main>
+  );
+}
+```
+
+```tsx Separate Component (components/Canvas.tsx)
+"use client";
+
+import { useCallback } from "react";
+import { GlCanvas, Shape, Circle } from "react-thorvg-fiber";
+import wasmUrl from "react-thorvg-fiber/thorvg-gl.wasm";
+
+export function Canvas() {
+  const locateFile = useCallback(() => {
+    return wasmUrl;
+  }, []);
+
+  return (
+    <GlCanvas id="my-canvas" width={500} height={500} locateFile={locateFile}>
+      <Shape x={250} y={250} fill={[0, 0, 255, 255]}>
+        <Circle cx={0} cy={0} rx={50} ry={50} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+
+</CodeGroup>
+
+</Steps>
+
+## Advanced Configuration
+
+### TypeScript Configuration
+
+Add type declarations for WASM imports. Create or update `next-env.d.ts`:
+
+```ts
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+declare module "*.wasm" {
+  const content: string;
+  export default content;
+}
+```
+
+### Dynamic Imports
+
+For better code splitting, you can dynamically import the canvas component:
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const Canvas = dynamic(() => import('@/components/Canvas'), {
+  ssr: false,
+  loading: () => <p>Loading canvas...</p>,
+});
+
+export default function Home() {
+  return (
+    <main>
+      <Canvas />
+    </main>
+  );
+}
+```
+
+### Custom WASM Path
+
+Serve WASM files from a CDN or custom path:
+
+```tsx
+const locateFile = useCallback(() => {
+  const isProd = process.env.NODE_ENV === 'production';
+  return isProd 
+    ? 'https://cdn.example.com/thorvg-sw.wasm'
+    : wasmUrl;
+}, []);
+```
+
+### Static Export
+
+If using `output: 'export'` for static HTML export, ensure WASM files are in the `public` folder:
+
+```js
+// next.config.mjs
+const config = {
+  output: 'export',
+  webpack: (config) => {
+    // ... webpack config as shown above
+    return config;
+  },
+};
+```
+
+Then copy WASM files to `public/`:
+
+```bash
+cp node_modules/react-thorvg-fiber/dist/*.wasm public/
+```
+
+And update the import:
+
+```tsx
+const locateFile = useCallback(() => {
+  return "/thorvg-sw.wasm";
+}, []);
+```
+
+## Troubleshooting
+
+### Webpack Configuration Not Applied
+
+**Problem:** Changes to `next.config.mjs` are not taking effect
+
+**Solution:** 
+1. Stop the dev server completely
+2. Delete `.next` folder: `rm -rf .next`
+3. Restart dev server: `npm run dev`
+
+### WASM Import Errors
+
+**Problem:** `Module parse failed: Unexpected character` when importing WASM
+
+**Solution:** Ensure you've added the webpack configuration to `next.config.mjs`. Do **not** use the `?url` suffix (that's Vite-specific):
+
+```tsx
+// ✅ Correct for Next.js
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm";
+
+// ❌ Incorrect (Vite only)
+import wasmUrl from "react-thorvg-fiber/thorvg-sw.wasm?url";
+```
+
+### "use client" Missing
+
+**Problem:** `Error: Cannot read properties of undefined` or hydration errors
+
+**Solution:** Add `"use client"` directive at the top of files using ThorVG:
+
+```tsx
+"use client"; // Must be at the very top
+
+import { SwCanvas } from "react-thorvg-fiber";
+// ...
+```
+
+### Server-Side Rendering Errors
+
+**Problem:** `ReferenceError: HTMLCanvasElement is not defined`
+
+**Solution:** Use dynamic imports with `ssr: false`:
+
+```tsx
+const Canvas = dynamic(() => import('@/components/Canvas'), {
+  ssr: false,
+});
+```
+
+### Production Build Failures
+
+**Problem:** Build fails with WASM-related errors
+
+**Solution:**
+1. Verify webpack configuration is correct
+2. Clear build cache: `rm -rf .next`
+3. Try building again: `npm run build`
+4. Check that WASM files exist in `.next/static/chunks/`
+
+### MIME Type Errors
+
+**Problem:** `Failed to load WASM: Incorrect response MIME type`
+
+**Solution:** Configure your hosting provider to serve `.wasm` files with `application/wasm` MIME type.
+
+For Vercel (usually automatic), add to `vercel.json` if needed:
+
+```json
+{
+  "headers": [
+    {
+      "source": "/(.*).wasm",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/wasm"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### TypeScript Module Not Found
+
+**Problem:** TypeScript error: `Cannot find module 'react-thorvg-fiber/thorvg-sw.wasm'`
+
+**Solution:** Add the module declaration to `next-env.d.ts` as shown in the TypeScript Configuration section.
+
+## Next Steps
+
+- Learn about [WASM Configuration](/guides/wasm-configuration) for advanced setup
+- Explore [Performance Tips](/guides/performance) to optimize rendering  
+- Check out [Examples](/examples/basic-shapes) to see what's possible

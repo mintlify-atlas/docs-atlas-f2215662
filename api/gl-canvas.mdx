@@ -1,0 +1,286 @@
+---
+title: GlCanvas
+description: Hardware-accelerated canvas component for ThorVG using WebGL rendering
+---
+
+## Overview
+
+The `GlCanvas` component provides a hardware-accelerated canvas for ThorVG vector graphics using WebGL. It uses GPU-based rendering for superior performance with complex scenes compared to the CPU-based SwCanvas.
+
+### When to Use GlCanvas
+
+- High performance is critical
+- Complex scenes with many shapes (1000+)
+- Animations and real-time updates
+- Large canvas dimensions
+- WebGL is available and enabled in the target environment
+
+## Import
+
+```tsx
+import { GlCanvas } from 'react-thorvg-fiber';
+```
+
+## Basic Usage
+
+```tsx
+import { GlCanvas, Shape } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <GlCanvas id="my-canvas" width={800} height={600}>
+      <Shape>
+        <rect x={100} y={100} width={200} height={150} />
+        <fill color="#3498db" />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+
+## Props
+
+<ParamField path="id" type="string" required>
+  Required unique ID for the canvas element. Used by the WebGL context to bind to the canvas.
+  
+  This must be a unique identifier in your application, as WebGL requires a specific DOM element reference.
+  
+  ```tsx
+  <GlCanvas id="main-canvas" width={800} height={600}>
+    {/* ... */}
+  </GlCanvas>
+  ```
+</ParamField>
+
+<ParamField path="width" type="number" required>
+  Width of the canvas in CSS pixels. This determines the logical width of the canvas element.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the canvas in CSS pixels. This determines the logical height of the canvas element.
+</ParamField>
+
+<ParamField path="devicePixelRatio" type="number" default="window.devicePixelRatio">
+  Device pixel ratio for high-DPI displays. Controls the actual resolution of the WebGL buffer.
+  Higher values provide sharper rendering on high-DPI screens but require more GPU memory and processing.
+  
+  If not specified, defaults to `window.devicePixelRatio` to automatically match the device's pixel density.
+</ParamField>
+
+<ParamField path="locateFile" type="(path: string, prefix: string) => string">
+  Optional function to customize the location of WebAssembly files. This is useful for:
+  - Custom asset paths in bundlers
+  - CDN configurations
+  - Non-standard public directory structures
+  
+  **Parameters:**
+  - `path`: The requested file path
+  - `prefix`: The default prefix for the file
+  
+  **Returns:** The resolved file path
+  
+  ```tsx
+  <GlCanvas
+    id="my-canvas"
+    width={800}
+    height={600}
+    locateFile={(path, prefix) => `/assets/wasm/${path}`}
+  >
+    {/* ... */}
+  </GlCanvas>
+  ```
+</ParamField>
+
+### Additional Props
+
+The `GlCanvas` component extends all standard HTML canvas element props (from `ComponentPropsWithoutRef<'canvas'>`), including:
+
+- `className`: CSS class name
+- `style`: Inline styles
+- `onClick`, `onMouseMove`, etc.: Event handlers
+- And all other standard canvas attributes
+
+## Advanced Examples
+
+### High-Performance Animation
+
+```tsx
+import { GlCanvas, Shape } from 'react-thorvg-fiber';
+import { useState, useEffect } from 'react';
+
+function AnimatedCanvas() {
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotation(r => (r + 1) % 360);
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <GlCanvas id="animated-canvas" width={800} height={600}>
+      <Shape>
+        <rect x={350} y={250} width={100} height={100} />
+        <fill color="#9b59b6" />
+        <transform rotate={rotation} cx={400} cy={300} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+
+### High-DPI Display Support
+
+```tsx
+<GlCanvas
+  id="hires-canvas"
+  width={800}
+  height={600}
+  devicePixelRatio={2}
+>
+  <Shape>
+    <circle cx={400} cy={300} r={100} />
+    <fill color="#e74c3c" />
+  </Shape>
+</GlCanvas>
+```
+
+### Custom WASM File Location
+
+```tsx
+import { GlCanvas } from 'react-thorvg-fiber';
+
+function App() {
+  const locateFile = (path: string, prefix: string) => {
+    // Load WASM files from a CDN
+    return `https://cdn.example.com/thorvg/${path}`;
+  };
+
+  return (
+    <GlCanvas
+      id="cdn-canvas"
+      width={1920}
+      height={1080}
+      locateFile={locateFile}
+    >
+      {/* Your vector graphics */}
+    </GlCanvas>
+  );
+}
+```
+
+### Complex Scene with Many Shapes
+
+```tsx
+import { GlCanvas, Shape } from 'react-thorvg-fiber';
+
+function ComplexScene() {
+  // Generate 1000 circles
+  const shapes = Array.from({ length: 1000 }, (_, i) => {
+    const x = (i % 40) * 20 + 10;
+    const y = Math.floor(i / 40) * 20 + 10;
+    const hue = (i * 3.6) % 360;
+    
+    return (
+      <Shape key={i}>
+        <circle cx={x} cy={y} r={8} />
+        <fill color={`hsl(${hue}, 70%, 50%)`} />
+      </Shape>
+    );
+  });
+
+  return (
+    <GlCanvas
+      id="complex-canvas"
+      width={800}
+      height={600}
+      style={{ border: '1px solid #ccc' }}
+    >
+      {shapes}
+    </GlCanvas>
+  );
+}
+```
+
+### Multiple Canvases
+
+```tsx
+import { GlCanvas, Shape } from 'react-thorvg-fiber';
+
+function MultipleCanvases() {
+  return (
+    <div style={{ display: 'flex', gap: '20px' }}>
+      <GlCanvas id="canvas-1" width={400} height={300}>
+        <Shape>
+          <rect x={150} y={100} width={100} height={100} />
+          <fill color="#3498db" />
+        </Shape>
+      </GlCanvas>
+      
+      <GlCanvas id="canvas-2" width={400} height={300}>
+        <Shape>
+          <circle cx={200} cy={150} r={50} />
+          <fill color="#e74c3c" />
+        </Shape>
+      </GlCanvas>
+    </div>
+  );
+}
+```
+
+## Type Signature
+
+```tsx
+interface GlCanvasCustomProps {
+  width: number;
+  height: number;
+  id: string;
+  devicePixelRatio?: number;
+  locateFile?: (path: string, prefix: string) => string;
+}
+
+type GlCanvasProps = ComponentPropsWithoutRef<'canvas'> & GlCanvasCustomProps;
+
+const GlCanvas: FC<PropsWithChildren<GlCanvasProps>>;
+```
+
+## Implementation Details
+
+The `GlCanvas` component:
+
+1. **Initializes ThorVG**: Loads the WebAssembly module and creates a ThorVG engine instance
+2. **Creates WebGL Canvas**: Sets up a WebGL rendering context with ABGR8888S (straight alpha) color space
+3. **React Reconciler**: Establishes a custom React reconciler to handle declarative child components
+4. **Automatic Updates**: Updates the canvas whenever children or props change
+5. **Resource Cleanup**: Properly disposes of WebGL and ThorVG resources on unmount
+
+### Performance Characteristics
+
+- **Rendering**: GPU-accelerated, hardware-optimized
+- **Compatibility**: Requires WebGL support (available in 97%+ of browsers)
+- **Memory**: Higher GPU memory usage for large buffers
+- **Best for**: Complex scenes with 1000+ shapes, animations, large dimensions
+
+### Color Space
+
+The `GlCanvas` uses `ABGR8888S` (straight alpha) color space, which is optimized for WebGL rendering. This differs from `SwCanvas` which uses `ABGR8888` (premultiplied alpha).
+
+## Differences from SwCanvas
+
+| Feature | GlCanvas | SwCanvas |
+|---------|----------|----------|
+| Rendering | GPU (WebGL) | CPU (Software) |
+| Performance | Excellent for complex scenes | Good for simple scenes |
+| Compatibility | Requires WebGL | Universal |
+| ID Prop | Required | Not needed |
+| Color Space | ABGR8888S (straight alpha) | ABGR8888 (premultiplied) |
+| Memory | Higher GPU memory | Lower system memory |
+| Best Use | Complex graphics, animations | Simple graphics, compatibility |
+
+## See Also
+
+- [SwCanvas](/api/sw-canvas) - Software-rendered CPU canvas
+- [Shape](/api/shape) - Vector shape component
+- [Scene](/api/scene) - Container for grouping shapes

@@ -1,0 +1,228 @@
+---
+title: Installation
+description: Install react-thorvg-fiber using your preferred package manager
+---
+
+# Installation
+
+Install `react-thorvg-fiber` using your preferred package manager:
+
+<CodeGroup>
+
+```bash npm
+npm install react-thorvg-fiber
+```
+
+```bash yarn
+yarn add react-thorvg-fiber
+```
+
+```bash pnpm
+pnpm add react-thorvg-fiber
+```
+
+```bash bun
+bun add react-thorvg-fiber
+```
+
+</CodeGroup>
+
+## Requirements
+
+React ThorVG Fiber requires the following peer dependencies:
+
+- **React**: `^19.0.0`
+- **React DOM**: `^19.0.0`
+
+<Info>
+  React ThorVG Fiber is built for React 19. Make sure your project uses React 19 or later.
+</Info>
+
+## Browser Support
+
+React ThorVG Fiber requires:
+
+- **WebAssembly**: All modern browsers (Chrome, Firefox, Safari, Edge)
+- **WebGL**: Required only for `GlCanvas` (hardware-accelerated rendering)
+- **Canvas 2D**: Required for `SwCanvas` (software rendering)
+
+<Note>
+  Most modern browsers support these features. For older browsers, consider using a fallback or polyfill.
+</Note>
+
+## TypeScript Support
+
+React ThorVG Fiber is written in TypeScript and includes comprehensive type definitions. No additional `@types` packages are needed.
+
+```tsx
+import type { SwCanvasProps, ShapeProps, CircleProps } from 'react-thorvg-fiber';
+```
+
+## Package Contents
+
+When you install `react-thorvg-fiber`, you get:
+
+- **Main library**: React components and hooks
+- **WebAssembly modules**:
+  - `thorvg-sw.wasm` - Software rendering engine
+  - `thorvg-gl.wasm` - WebGL rendering engine
+- **TypeScript definitions**: Complete type definitions for all APIs
+
+## Module Exports
+
+The package provides the following exports:
+
+```tsx
+import {
+  // Canvas components
+  SwCanvas,      // Software rendering canvas
+  GlCanvas,      // WebGL rendering canvas
+  
+  // Shape components
+  Shape,         // Base shape with fill/stroke
+  Scene,         // Container for grouping shapes
+  
+  // Geometry components
+  Rect,          // Rectangle/rounded rectangle
+  Circle,        // Circle/ellipse
+  Path,          // Custom path with commands
+  
+  // Constants
+  PathCommand,   // Path command types (MoveTo, LineTo, etc.)
+  FillRule,      // Fill rules (Winding, EvenOdd)
+  StrokeCap,     // Stroke cap styles (Butt, Round, Square)
+  StrokeJoin,    // Stroke join styles (Miter, Round, Bevel)
+  
+  // Types
+  type SwCanvasProps,
+  type GlCanvasProps,
+  type ShapeProps,
+  type SceneProps,
+  type RectProps,
+  type CircleProps,
+  type PathProps,
+  type Color,
+  type TransformProps,
+  type Point,
+} from 'react-thorvg-fiber';
+```
+
+## WebAssembly File Setup
+
+The WebAssembly files need to be accessible to your application. The setup depends on your bundler:
+
+### Vite
+
+With Vite, you can import WASM files directly:
+
+```tsx
+import { SwCanvas } from 'react-thorvg-fiber';
+// @ts-expect-error - WASM import
+import wasmUrl from 'react-thorvg-fiber/thorvg-sw.wasm';
+
+function App() {
+  const locateFile = () => wasmUrl;
+  
+  return (
+    <SwCanvas width={400} height={400} locateFile={locateFile}>
+      {/* your shapes */}
+    </SwCanvas>
+  );
+}
+```
+
+<Info>
+  The `@ts-expect-error` comment is needed because TypeScript doesn't recognize `.wasm` imports by default.
+</Info>
+
+### Webpack
+
+For Webpack, you may need to configure WASM loading:
+
+```js
+// webpack.config.js
+module.exports = {
+  experiments: {
+    asyncWebAssembly: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: 'asset/resource',
+      },
+    ],
+  },
+};
+```
+
+### Next.js
+
+For Next.js, add WASM support to your config:
+
+```js
+// next.config.js
+module.exports = {
+  webpack: (config) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    
+    config.module.rules.push({
+      test: /\.wasm$/,
+      type: 'asset/resource',
+    });
+    
+    return config;
+  },
+};
+```
+
+<Warning>
+  React ThorVG Fiber uses client-side features (Canvas, WebGL). In Next.js, use `"use client"` directive in components that use the library.
+</Warning>
+
+## CDN Usage
+
+If you're using a CDN or custom asset path, use the `locateFile` prop to specify where to load the WASM files:
+
+```tsx
+function App() {
+  const locateFile = (path: string) => {
+    return `https://your-cdn.com/wasm/${path}`;
+  };
+  
+  return (
+    <SwCanvas width={400} height={400} locateFile={locateFile}>
+      {/* your shapes */}
+    </SwCanvas>
+  );
+}
+```
+
+## Verify Installation
+
+Create a simple test to verify everything is working:
+
+```tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+function Test() {
+  return (
+    <SwCanvas width={100} height={100}>
+      <Shape fill={[255, 0, 0, 255]}>
+        <Circle x={50} y={50} radius={25} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+If you see a red circle, you're ready to go!
+
+## Next Steps
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  Build your first vector graphic with step-by-step instructions
+</Card>

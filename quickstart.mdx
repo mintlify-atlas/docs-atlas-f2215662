@@ -1,80 +1,394 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Build your first vector graphic with React ThorVG Fiber in minutes
 ---
 
-## Get started in three steps
+# Quick Start
 
-Get your documentation site running locally and make your first customization.
+This guide will walk you through creating your first vector graphics with React ThorVG Fiber. We'll cover both software rendering (`SwCanvas`) and hardware-accelerated rendering (`GlCanvas`).
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Make sure you have:
 
-### Step 2: Deploy your changes
+1. Installed `react-thorvg-fiber` ([Installation Guide](/installation))
+2. React 19 or later
+3. A bundler configured for WASM files (Vite, Webpack, Next.js, etc.)
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+## Basic Concepts
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+Before we start, let's understand the core concepts:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<Steps>
+  <Step title="Canvas">
+    Choose between `SwCanvas` (software rendering) or `GlCanvas` (WebGL rendering). The canvas is your drawing surface.
+  </Step>
+  <Step title="Shape">
+    Shapes define visual appearance (fill color, stroke color, opacity, transforms). Every Shape needs geometry children.
+  </Step>
+  <Step title="Geometry">
+    Geometry components (`Rect`, `Circle`, `Path`) define what to draw. They must be children of a `Shape`.
+  </Step>
+</Steps>
 
-### Step 3: Go live
+<Info>
+  The component hierarchy is always: **Canvas → Shape → Geometry**
+</Info>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## Your First Shape
 
-## Next steps
+Let's create a simple blue circle using software rendering:
 
-Now that you have your docs running, explore these key features:
+```tsx App.tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
 
-<CardGroup cols={2}>
+function App() {
+  return (
+    <SwCanvas width={400} height={400}>
+      <Shape fill={[59, 130, 246, 255]}>
+        <Circle x={200} y={200} radius={100} />
+      </Shape>
+    </SwCanvas>
+  );
+}
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+export default App;
+```
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Colors are defined as RGBA arrays: `[red, green, blue, alpha]` where each value is 0-255.
 </Note>
+
+## Understanding the Code
+
+Let's break down what each part does:
+
+1. **SwCanvas**: Creates a 400×400 software-rendered canvas
+   - `width` and `height` are in CSS pixels
+   - Automatically handles high-DPI displays
+
+2. **Shape**: Defines visual properties
+   - `fill={[59, 130, 246, 255]}` sets a blue fill color (RGB: 59, 130, 246)
+   - Can also have `stroke`, `opacity`, transforms, etc.
+
+3. **Circle**: Defines the geometry
+   - `x={200} y={200}` sets the center position
+   - `radius={100}` sets the circle size
+
+## Multiple Shapes
+
+You can render multiple shapes by adding more Shape components:
+
+```tsx
+import { SwCanvas, Shape, Rect, Circle } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={400} height={400}>
+      {/* Blue rectangle */}
+      <Shape fill={[59, 130, 246, 255]}>
+        <Rect x={50} y={50} width={100} height={100} />
+      </Shape>
+      
+      {/* Orange circle */}
+      <Shape fill={[234, 88, 12, 255]}>
+        <Circle x={300} y={150} radius={50} />
+      </Shape>
+      
+      {/* Green rounded rectangle */}
+      <Shape fill={[34, 197, 94, 255]}>
+        <Rect x={200} y={250} width={100} height={100} rx={15} ry={15} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+## Adding Strokes
+
+Shapes can have both fill and stroke:
+
+```tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={400} height={400}>
+      <Shape 
+        fill={[255, 255, 255, 255]}      // White fill
+        stroke={[59, 130, 246, 255]}      // Blue stroke
+        strokeWidth={8}                   // 8px stroke width
+      >
+        <Circle x={200} y={200} radius={100} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+## Drawing Paths
+
+For custom shapes, use the `Path` component with path commands:
+
+```tsx
+import { SwCanvas, Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={400} height={400}>
+      <Shape 
+        stroke={[234, 88, 12, 255]} 
+        strokeWidth={8}
+      >
+        <Path
+          commands={[
+            PathCommand.MoveTo,   // Start at first point
+            PathCommand.LineTo,   // Draw line to second point
+          ]}
+          points={[
+            { x: 100, y: 100 },   // Start point
+            { x: 300, y: 300 },   // End point
+          ]}
+        />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+## Using WebGL (GlCanvas)
+
+For better performance with complex scenes, use `GlCanvas` for hardware-accelerated rendering:
+
+```tsx
+import { GlCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <GlCanvas 
+      id="my-canvas"           // Required: unique ID for WebGL context
+      width={400} 
+      height={400}
+    >
+      <Shape fill={[59, 130, 246, 255]}>
+        <Circle x={200} y={200} radius={100} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+
+<Warning>
+  `GlCanvas` requires a unique `id` prop for the WebGL context to bind to the canvas element.
+</Warning>
+
+## Setting Up WASM Files
+
+In a real application with a bundler like Vite, you need to configure the WASM file location:
+
+<Tabs>
+  <Tab title="Software Rendering">
+    ```tsx
+    import { useCallback } from 'react';
+    import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+    // @ts-expect-error - WASM import
+    import wasmUrl from 'react-thorvg-fiber/thorvg-sw.wasm';
+
+    function App() {
+      const locateFile = useCallback(() => wasmUrl, []);
+      
+      return (
+        <SwCanvas 
+          width={400} 
+          height={400}
+          locateFile={locateFile}
+        >
+          <Shape fill={[59, 130, 246, 255]}>
+            <Circle x={200} y={200} radius={100} />
+          </Shape>
+        </SwCanvas>
+      );
+    }
+    ```
+  </Tab>
+  <Tab title="WebGL Rendering">
+    ```tsx
+    import { useCallback } from 'react';
+    import { GlCanvas, Shape, Circle } from 'react-thorvg-fiber';
+    // @ts-expect-error - WASM import
+    import wasmUrl from 'react-thorvg-fiber/thorvg-gl.wasm';
+
+    function App() {
+      const locateFile = useCallback(() => wasmUrl, []);
+      
+      return (
+        <GlCanvas 
+          id="my-canvas"
+          width={400} 
+          height={400}
+          locateFile={locateFile}
+        >
+          <Shape fill={[59, 130, 246, 255]}>
+            <Circle x={200} y={200} radius={100} />
+          </Shape>
+        </GlCanvas>
+      );
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Complete Working Example
+
+Here's a complete example that works with Vite:
+
+```tsx App.tsx
+import { useCallback } from 'react';
+import { SwCanvas, Shape, Rect, Circle } from 'react-thorvg-fiber';
+// @ts-expect-error - WASM import
+import wasmUrl from 'react-thorvg-fiber/thorvg-sw.wasm';
+
+function App() {
+  const locateFile = useCallback(() => wasmUrl, []);
+  
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>My First Vector Graphic</h1>
+      <SwCanvas 
+        width={400} 
+        height={400}
+        locateFile={locateFile}
+        style={{ border: '1px solid #ccc' }}
+      >
+        {/* Blue square */}
+        <Shape fill={[59, 130, 246, 255]}>
+          <Rect x={50} y={50} width={100} height={100} />
+        </Shape>
+        
+        {/* Orange circle with stroke */}
+        <Shape 
+          fill={[234, 88, 12, 255]}
+          stroke={[255, 255, 255, 255]}
+          strokeWidth={4}
+        >
+          <Circle x={300} y={100} radius={50} />
+        </Shape>
+        
+        {/* Green rounded rectangle */}
+        <Shape fill={[34, 197, 94, 255]}>
+          <Rect x={150} y={250} width={100} height={100} rx={20} ry={20} />
+        </Shape>
+      </SwCanvas>
+    </div>
+  );
+}
+
+export default App;
+```
+
+## High-DPI Support
+
+For crisp rendering on high-DPI displays (Retina, 4K, etc.), use the `devicePixelRatio` prop:
+
+```tsx
+<SwCanvas 
+  width={400} 
+  height={400}
+  devicePixelRatio={window.devicePixelRatio}  // Automatic
+  // or
+  devicePixelRatio={2}  // Manual 2x scaling
+>
+  {/* shapes */}
+</SwCanvas>
+```
+
+<Tip>
+  The canvas will automatically use `window.devicePixelRatio` if not specified.
+</Tip>
+
+## SwCanvas vs GlCanvas
+
+Choose the right canvas for your use case:
+
+| Feature | SwCanvas | GlCanvas |
+|---------|----------|----------|
+| **Rendering** | CPU (Canvas 2D) | GPU (WebGL) |
+| **Performance** | Good for simple scenes | Better for complex scenes |
+| **Compatibility** | All modern browsers | Requires WebGL support |
+| **Setup** | Simpler | Requires unique `id` prop |
+| **Use Case** | Small to medium graphics | Large, complex animations |
+
+<Info>
+  Start with `SwCanvas` for simplicity. Switch to `GlCanvas` if you notice performance issues with complex scenes.
+</Info>
+
+## Common Patterns
+
+### Reusable Shape Component
+
+```tsx
+interface CircleShapeProps {
+  x: number;
+  y: number;
+  radius: number;
+  color: [number, number, number, number];
+}
+
+function CircleShape({ x, y, radius, color }: CircleShapeProps) {
+  return (
+    <Shape fill={color}>
+      <Circle x={x} y={y} radius={radius} />
+    </Shape>
+  );
+}
+
+// Usage
+<SwCanvas width={400} height={400}>
+  <CircleShape x={100} y={100} radius={50} color={[59, 130, 246, 255]} />
+  <CircleShape x={300} y={100} radius={50} color={[234, 88, 12, 255]} />
+</SwCanvas>
+```
+
+### Dynamic Content
+
+```tsx
+function App() {
+  const [radius, setRadius] = useState(50);
+  
+  return (
+    <div>
+      <input 
+        type="range" 
+        min="10" 
+        max="150" 
+        value={radius}
+        onChange={(e) => setRadius(Number(e.target.value))}
+      />
+      <SwCanvas width={400} height={400}>
+        <Shape fill={[59, 130, 246, 255]}>
+          <Circle x={200} y={200} radius={radius} />
+        </Shape>
+      </SwCanvas>
+    </div>
+  );
+}
+```
+
+## Next Steps
+
+Now that you've created your first graphics, explore more:
+
+<CardGroup cols={2}>
+  <Card title="Canvas Types" icon="window" href="/concepts/canvas-types">
+    Learn about SwCanvas and GlCanvas properties
+  </Card>
+  <Card title="Shapes Guide" icon="shapes" href="/api/shape">
+    Master fills, strokes, and transformations
+  </Card>
+  <Card title="Geometry Components" icon="circle" href="/concepts/shapes-and-geometry">
+    Explore Rect, Circle, and Path components
+  </Card>
+  <Card title="Examples" icon="palette" href="/examples/basic-shapes">
+    See more complex examples and patterns
+  </Card>
+</CardGroup>

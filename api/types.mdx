@@ -1,0 +1,659 @@
+---
+title: Types
+description: TypeScript type definitions for React ThorVG Fiber components
+---
+
+## Color
+
+RGBA color represented as a tuple of four numbers.
+
+```typescript
+type Color = [number, number, number, number];
+```
+
+<ParamField path="[0]" type="number" required>
+  Red component (0-255)
+</ParamField>
+
+<ParamField path="[1]" type="number" required>
+  Green component (0-255)
+</ParamField>
+
+<ParamField path="[2]" type="number" required>
+  Blue component (0-255)
+</ParamField>
+
+<ParamField path="[3]" type="number" required>
+  Alpha component (0-255)
+</ParamField>
+
+<CodeGroup>
+```tsx Example
+const red: Color = [255, 0, 0, 255];
+const semiTransparentBlue: Color = [0, 0, 255, 128];
+const black: Color = [0, 0, 0, 255];
+```
+</CodeGroup>
+
+---
+
+## Point
+
+Represents a 2D coordinate point.
+
+```typescript
+interface Point {
+  x: number;
+  y: number;
+}
+```
+
+<ParamField path="x" type="number" required>
+  X-coordinate
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y-coordinate
+</ParamField>
+
+<CodeGroup>
+```tsx Example
+const origin: Point = { x: 0, y: 0 };
+const topRight: Point = { x: 100, y: 0 };
+```
+</CodeGroup>
+
+---
+
+## TransformProps
+
+Base transformation properties for positioned elements.
+
+```typescript
+interface TransformProps {
+  x?: number;
+  y?: number;
+  rotation?: number;
+  scaleX?: number;
+  scaleY?: number;
+}
+```
+
+<ParamField path="x" type="number">
+  X-axis translation in pixels
+</ParamField>
+
+<ParamField path="y" type="number">
+  Y-axis translation in pixels
+</ParamField>
+
+<ParamField path="rotation" type="number">
+  Rotation angle in degrees
+</ParamField>
+
+<ParamField path="scaleX" type="number" default="1">
+  Horizontal scale factor
+</ParamField>
+
+<ParamField path="scaleY" type="number" default="1">
+  Vertical scale factor
+</ParamField>
+
+<CodeGroup>
+```tsx Example
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+function TransformedShape() {
+  return (
+    <Shape
+      x={100}
+      y={50}
+      rotation={45}
+      scaleX={1.5}
+      scaleY={1.5}
+      fill={[255, 0, 0, 255]}
+    >
+      <Rect x={0} y={0} width={50} height={50} />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## ShapeProps
+
+Props for the Shape component. Shapes can contain geometry children (Rect, Circle, Path) to define their appearance.
+
+```typescript
+interface ShapeProps extends TransformProps {
+  fill?: Color;
+  stroke?: Color;
+  strokeWidth?: number;
+  strokeDash?: number[];
+  strokeDashOffset?: number;
+  strokeCap?: StrokeCapType;
+  strokeJoin?: StrokeJoinType;
+  strokeMiterlimit?: number;
+  opacity?: number;
+  fillRule?: FillRuleType;
+}
+```
+
+### Visual Properties
+
+<ParamField path="fill" type="Color">
+  Fill color as RGBA tuple [R, G, B, A], each component 0-255
+</ParamField>
+
+<ParamField path="stroke" type="Color">
+  Stroke color as RGBA tuple [R, G, B, A], each component 0-255
+</ParamField>
+
+<ParamField path="strokeWidth" type="number">
+  Width of the stroke in pixels
+</ParamField>
+
+<ParamField path="opacity" type="number" default="255">
+  Opacity value from 0 (transparent) to 255 (opaque)
+</ParamField>
+
+### Stroke Styling
+
+<ParamField path="strokeDash" type="number[]">
+  Stroke dash pattern as an array of lengths
+  
+  ```tsx
+  strokeDash={[5, 10]} // 5px dash, 10px gap
+  ```
+</ParamField>
+
+<ParamField path="strokeDashOffset" type="number">
+  Offset for stroke dash pattern in pixels
+</ParamField>
+
+<ParamField path="strokeCap" type="StrokeCapType">
+  Cap style for stroke endpoints. See [StrokeCap](/api/constants#strokecap)
+</ParamField>
+
+<ParamField path="strokeJoin" type="StrokeJoinType">
+  Join style for stroke corners. See [StrokeJoin](/api/constants#strokejoin)
+</ParamField>
+
+<ParamField path="strokeMiterlimit" type="number" default="4">
+  Miter limit for stroke joins
+</ParamField>
+
+### Fill Styling
+
+<ParamField path="fillRule" type="FillRuleType">
+  Fill rule for determining shape interior. See [FillRule](/api/constants#fillrule)
+</ParamField>
+
+### Transform Properties
+
+Inherits all properties from [TransformProps](#transformprops).
+
+<CodeGroup>
+```tsx Basic Example
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+function StyledShape() {
+  return (
+    <Shape
+      fill={[255, 0, 0, 255]}
+      stroke={[0, 0, 0, 255]}
+      strokeWidth={2}
+    >
+      <Rect x={0} y={0} width={100} height={100} />
+    </Shape>
+  );
+}
+```
+
+```tsx Dashed Stroke
+import { Shape, Circle, StrokeCap } from 'react-thorvg-fiber';
+
+function DashedCircle() {
+  return (
+    <Shape
+      stroke={[0, 100, 200, 255]}
+      strokeWidth={3}
+      strokeDash={[10, 5]}
+      strokeCap={StrokeCap.Round}
+    >
+      <Circle x={50} y={50} radius={40} />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## RectProps
+
+Props for the Rect component. Must be a child of a Shape component to be rendered.
+
+```typescript
+interface RectProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rx?: number;
+  ry?: number;
+}
+```
+
+<ParamField path="x" type="number" required>
+  X-coordinate of the rectangle's top-left corner
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y-coordinate of the rectangle's top-left corner
+</ParamField>
+
+<ParamField path="width" type="number" required>
+  Width of the rectangle in pixels
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the rectangle in pixels
+</ParamField>
+
+<ParamField path="rx" type="number">
+  Horizontal corner radius for rounded rectangles
+</ParamField>
+
+<ParamField path="ry" type="number">
+  Vertical corner radius for rounded rectangles
+</ParamField>
+
+<CodeGroup>
+```tsx Basic Rectangle
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+function BasicRect() {
+  return (
+    <Shape fill={[100, 150, 200, 255]}>
+      <Rect x={10} y={10} width={80} height={60} />
+    </Shape>
+  );
+}
+```
+
+```tsx Rounded Rectangle
+import { Shape, Rect } from 'react-thorvg-fiber';
+
+function RoundedRect() {
+  return (
+    <Shape fill={[255, 100, 100, 255]}>
+      <Rect x={10} y={10} width={80} height={60} rx={10} ry={10} />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## CircleProps
+
+Props for the Circle component. Must be a child of a Shape component to be rendered.
+
+```typescript
+interface CircleProps {
+  x: number;
+  y: number;
+  radius?: number;
+  rx?: number;
+  ry?: number;
+}
+```
+
+<ParamField path="x" type="number" required>
+  X-coordinate of the circle's center
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y-coordinate of the circle's center
+</ParamField>
+
+<ParamField path="radius" type="number">
+  Radius for a perfect circle
+</ParamField>
+
+<ParamField path="rx" type="number">
+  Horizontal radius for an ellipse
+</ParamField>
+
+<ParamField path="ry" type="number">
+  Vertical radius for an ellipse
+</ParamField>
+
+<Note>
+  Use either `radius` for a perfect circle, or `rx` and `ry` for an ellipse.
+</Note>
+
+<CodeGroup>
+```tsx Perfect Circle
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+function PerfectCircle() {
+  return (
+    <Shape fill={[0, 200, 100, 255]}>
+      <Circle x={50} y={50} radius={30} />
+    </Shape>
+  );
+}
+```
+
+```tsx Ellipse
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+function Ellipse() {
+  return (
+    <Shape fill={[200, 0, 200, 255]}>
+      <Circle x={50} y={50} rx={40} ry={20} />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## PathProps
+
+Props for the Path component. Must be a child of a Shape component to be rendered.
+
+```typescript
+interface PathProps {
+  commands: PathCommandType[];
+  points: Point[];
+}
+```
+
+<ParamField path="commands" type="PathCommandType[]" required>
+  Array of path command types. Use PathCommand constants:
+  - `PathCommand.MoveTo` - Move to a point
+  - `PathCommand.LineTo` - Draw line to a point
+  - `PathCommand.CubicTo` - Draw cubic bezier curve
+  - `PathCommand.Close` - Close the path
+  
+  See [PathCommand](/api/constants#pathcommand)
+</ParamField>
+
+<ParamField path="points" type="Point[]" required>
+  Array of points corresponding to the commands. Each command consumes a different number of points:
+  - `MoveTo`: 1 point (x, y)
+  - `LineTo`: 1 point (x, y)
+  - `CubicTo`: 3 points (control1, control2, end)
+  - `Close`: 0 points
+</ParamField>
+
+<CodeGroup>
+```tsx Triangle
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+function Triangle() {
+  return (
+    <Shape fill={[255, 200, 0, 255]}>
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.LineTo,
+          PathCommand.LineTo,
+          PathCommand.Close,
+        ]}
+        points={[
+          { x: 50, y: 10 },
+          { x: 90, y: 80 },
+          { x: 10, y: 80 },
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+
+```tsx Bezier Curve
+import { Shape, Path, PathCommand } from 'react-thorvg-fiber';
+
+function BezierCurve() {
+  return (
+    <Shape
+      stroke={[0, 0, 0, 255]}
+      strokeWidth={2}
+    >
+      <Path
+        commands={[
+          PathCommand.MoveTo,
+          PathCommand.CubicTo,
+        ]}
+        points={[
+          { x: 10, y: 50 },
+          { x: 30, y: 10 },  // control point 1
+          { x: 70, y: 90 },  // control point 2
+          { x: 90, y: 50 },  // end point
+        ]}
+      />
+    </Shape>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## SceneProps
+
+Props for the Scene component. Scenes can contain multiple Shape children and other nested Scenes.
+
+```typescript
+interface SceneProps extends TransformProps {
+  opacity?: number;
+}
+```
+
+<ParamField path="opacity" type="number" default="255">
+  Opacity value from 0 (transparent) to 255 (opaque)
+</ParamField>
+
+### Transform Properties
+
+Inherits all properties from [TransformProps](#transformprops).
+
+<CodeGroup>
+```tsx Grouped Shapes
+import { Scene, Shape, Rect, Circle } from 'react-thorvg-fiber';
+
+function GroupedShapes() {
+  return (
+    <Scene x={50} y={50} rotation={30}>
+      <Shape fill={[255, 0, 0, 255]}>
+        <Rect x={0} y={0} width={50} height={50} />
+      </Shape>
+      <Shape fill={[0, 0, 255, 255]}>
+        <Circle x={60} y={25} radius={25} />
+      </Shape>
+    </Scene>
+  );
+}
+```
+
+```tsx Nested Scenes
+import { Scene, Shape, Circle } from 'react-thorvg-fiber';
+
+function NestedScenes() {
+  return (
+    <Scene x={100} y={100} opacity={200}>
+      <Scene rotation={45}>
+        <Shape fill={[255, 100, 0, 255]}>
+          <Circle x={0} y={0} radius={20} />
+        </Shape>
+      </Scene>
+      <Scene rotation={-45}>
+        <Shape fill={[0, 255, 100, 255]}>
+          <Circle x={0} y={0} radius={20} />
+        </Shape>
+      </Scene>
+    </Scene>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## SwCanvasProps
+
+Props for the SwCanvas component (software-rendered canvas).
+
+```typescript
+type SwCanvasProps = ComponentPropsWithoutRef<'canvas'> & {
+  width: number;
+  height: number;
+  devicePixelRatio?: number;
+  locateFile?: (path: string, prefix: string) => string;
+};
+```
+
+<ParamField path="width" type="number" required>
+  Width of the canvas in CSS pixels
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the canvas in CSS pixels
+</ParamField>
+
+<ParamField path="devicePixelRatio" type="number" default="window.devicePixelRatio">
+  Device pixel ratio for high-DPI displays
+</ParamField>
+
+<ParamField path="locateFile" type="function">
+  Optional function to customize the location of WebAssembly files. Useful for custom asset paths or CDN configurations.
+  
+  ```typescript
+  (path: string, prefix: string) => string
+  ```
+</ParamField>
+
+<Note>
+  SwCanvasProps also extends all standard HTML canvas element props (className, style, etc.)
+</Note>
+
+<CodeGroup>
+```tsx Basic Usage
+import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={400} height={300}>
+      <Shape fill={[100, 200, 255, 255]}>
+        <Rect x={50} y={50} width={300} height={200} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+```tsx Custom WASM Path
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas
+      width={400}
+      height={300}
+      locateFile={(path, prefix) => `/wasm/${path}`}
+    >
+      <Shape fill={[255, 100, 100, 255]}>
+        <Circle x={200} y={150} radius={80} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+</CodeGroup>
+
+---
+
+## GlCanvasProps
+
+Props for the GlCanvas component (WebGL-rendered canvas).
+
+```typescript
+type GlCanvasProps = ComponentPropsWithoutRef<'canvas'> & {
+  id: string;
+  width: number;
+  height: number;
+  devicePixelRatio?: number;
+  locateFile?: (path: string, prefix: string) => string;
+};
+```
+
+<ParamField path="id" type="string" required>
+  Required unique ID for the canvas element. Used by WebGL context to bind to the canvas.
+</ParamField>
+
+<ParamField path="width" type="number" required>
+  Width of the canvas in CSS pixels
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the canvas in CSS pixels
+</ParamField>
+
+<ParamField path="devicePixelRatio" type="number" default="window.devicePixelRatio">
+  Device pixel ratio for high-DPI displays
+</ParamField>
+
+<ParamField path="locateFile" type="function">
+  Optional function to customize the location of WebAssembly files. Useful for custom asset paths or CDN configurations.
+  
+  ```typescript
+  (path: string, prefix: string) => string
+  ```
+</ParamField>
+
+<Note>
+  GlCanvasProps also extends all standard HTML canvas element props (className, style, etc.)
+</Note>
+
+<CodeGroup>
+```tsx Basic Usage
+import { GlCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <GlCanvas id="my-canvas" width={400} height={300}>
+      <Shape fill={[100, 200, 255, 255]}>
+        <Rect x={50} y={50} width={300} height={200} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+
+```tsx High DPI
+import { GlCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <GlCanvas
+      id="hd-canvas"
+      width={800}
+      height={600}
+      devicePixelRatio={2}
+    >
+      <Shape fill={[255, 100, 100, 255]}>
+        <Circle x={400} y={300} radius={150} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+</CodeGroup>

@@ -1,0 +1,259 @@
+---
+title: Transforms
+description: Examples of rotation, scaling, and positioning shapes with React ThorVG Fiber
+---
+
+## Translation
+
+Move shapes using the `x` and `y` props on the `Shape` component.
+
+```tsx
+import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[59, 130, 246, 255]} x={40} y={40}>
+    <Rect x={0} y={0} width={60} height={60} />
+  </Shape>
+  <Shape fill={[234, 88, 12, 255]} x={120} y={120}>
+    <Rect x={0} y={0} width={60} height={60} />
+  </Shape>
+</SwCanvas>
+```
+
+The `x` and `y` props translate the entire shape. The first square appears at (40, 40) and the second at (120, 120).
+
+## Rotation
+
+Rotate shapes around their origin using the `rotation` prop (in degrees).
+
+<Tabs items={['Simple Rotation', 'Centered Rotation']}>
+  <Tab value="Simple Rotation">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} rotation={45}>
+        <Rect x={50} y={50} width={80} height={80} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Rotates the rectangle 45 degrees around the top-left corner of the canvas (0, 0).
+  </Tab>
+  
+  <Tab value="Centered Rotation">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} x={100} y={100} rotation={45}>
+        <Rect x={-40} y={-40} width={80} height={80} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Centers the rectangle at (100, 100) and rotates it 45 degrees around that point. By using negative offsets in the Rect, the shape rotates around its visual center.
+  </Tab>
+</Tabs>
+
+## Scale
+
+Scale shapes using the `scaleX` and `scaleY` props.
+
+<Tabs items={['Uniform Scale', 'Non-Uniform Scale', 'Scale from Center']}>
+  <Tab value="Uniform Scale">
+    ```tsx
+    import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]} scaleX={1.5} scaleY={1.5}>
+        <Circle x={100} y={100} radius={40} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Scales the circle uniformly by 1.5x in both directions.
+  </Tab>
+  
+  <Tab value="Non-Uniform Scale">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]} scaleX={1.5} scaleY={0.8}>
+        <Rect x={60} y={75} width={80} height={50} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Stretches the rectangle horizontally (1.5x) and compresses it vertically (0.8x).
+  </Tab>
+  
+  <Tab value="Scale from Center">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[34, 197, 94, 255]} x={100} y={100} scaleX={2} scaleY={2}>
+        <Rect x={-25} y={-25} width={50} height={50} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Scales from the center point (100, 100) by positioning the shape there and centering the geometry.
+  </Tab>
+</Tabs>
+
+## Combined Transforms
+
+Combine translation, rotation, and scaling for complex transformations.
+
+```tsx
+import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape
+    fill={[34, 197, 94, 255]}
+    x={100}
+    y={100}
+    rotation={30}
+    scaleX={1.2}
+    scaleY={1.2}
+  >
+    <Rect x={-40} y={-40} width={80} height={80} />
+  </Shape>
+</SwCanvas>
+```
+
+This example:
+1. Translates the shape to (100, 100)
+2. Scales it by 1.2x
+3. Rotates it 30 degrees
+
+Transforms are applied in this order: scale, rotation, then translation.
+
+## Transform Origin
+
+Control the transform origin point by carefully positioning your geometry.
+
+<Tabs items={['Top-Left Origin', 'Center Origin', 'Custom Origin']}>
+  <Tab value="Top-Left Origin">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} rotation={45}>
+        <Rect x={80} y={80} width={60} height={60} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Rotates around the top-left corner of the canvas (0, 0).
+  </Tab>
+  
+  <Tab value="Center Origin">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} x={100} y={100} rotation={45}>
+        <Rect x={-30} y={-30} width={60} height={60} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Rotates around the center of the shape by translating to (100, 100) and using negative offsets.
+  </Tab>
+  
+  <Tab value="Custom Origin">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} x={80} y={110} rotation={45}>
+        <Rect x={0} y={-30} width={60} height={60} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Rotates around a custom point (80, 110) - the left edge, vertically centered.
+  </Tab>
+</Tabs>
+
+## Animated Transforms
+
+Transforms can be animated using React state or animation libraries.
+
+```tsx
+import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+import { useState, useEffect } from 'react';
+
+function RotatingSquare() {
+  const [rotation, setRotation] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotation(r => (r + 1) % 360);
+    }, 16);
+    return () => clearInterval(interval);
+  }, []);
+  
+  return (
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]} x={100} y={100} rotation={rotation}>
+        <Rect x={-40} y={-40} width={80} height={80} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+This creates a continuously rotating square by updating the `rotation` prop every frame.
+
+## Negative Scales
+
+Use negative scale values to flip shapes.
+
+<Tabs items={['Horizontal Flip', 'Vertical Flip', 'Both']}>
+  <Tab value="Horizontal Flip">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} x={100} scaleX={-1}>
+        <Rect x={0} y={50} width={80} height={60} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Flips the rectangle horizontally.
+  </Tab>
+  
+  <Tab value="Vertical Flip">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} y={100} scaleY={-1}>
+        <Rect x={60} y={0} width={80} height={60} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Flips the rectangle vertically.
+  </Tab>
+  
+  <Tab value="Both">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[234, 88, 12, 255]} x={100} y={100} scaleX={-1} scaleY={-1}>
+        <Rect x={0} y={0} width={80} height={60} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Flips both horizontally and vertically (180-degree rotation equivalent).
+  </Tab>
+</Tabs>

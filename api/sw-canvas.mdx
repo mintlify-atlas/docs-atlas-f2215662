@@ -1,0 +1,191 @@
+---
+title: SwCanvas
+description: Software-rendered canvas component for ThorVG using CPU-based rendering
+---
+
+## Overview
+
+The `SwCanvas` component provides a software-rendered canvas for ThorVG vector graphics. It uses CPU-based rendering, making it highly compatible across different platforms and browsers, though it may be slower than the WebGL variant for complex scenes.
+
+### When to Use SwCanvas
+
+- Maximum browser and device compatibility is required
+- WebGL is not available or disabled
+- Simple to moderate complexity graphics
+- Server-side rendering or environments without GPU access
+- Testing and development where consistency is more important than performance
+
+## Import
+
+```tsx
+import { SwCanvas } from 'react-thorvg-fiber';
+```
+
+## Basic Usage
+
+```tsx
+import { SwCanvas, Shape } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={800} height={600}>
+      <Shape>
+        <rect x={100} y={100} width={200} height={150} />
+        <fill color="#3498db" />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+## Props
+
+<ParamField path="width" type="number" required>
+  Width of the canvas in CSS pixels. This determines the logical width of the canvas element.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the canvas in CSS pixels. This determines the logical height of the canvas element.
+</ParamField>
+
+<ParamField path="devicePixelRatio" type="number" default="window.devicePixelRatio">
+  Device pixel ratio for high-DPI displays. Controls the actual resolution of the canvas buffer.
+  Higher values provide sharper rendering on high-DPI screens but require more memory and processing.
+  
+  If not specified, defaults to `window.devicePixelRatio` to automatically match the device's pixel density.
+</ParamField>
+
+<ParamField path="locateFile" type="(path: string, prefix: string) => string">
+  Optional function to customize the location of WebAssembly files. This is useful for:
+  - Custom asset paths in bundlers
+  - CDN configurations
+  - Non-standard public directory structures
+  
+  **Parameters:**
+  - `path`: The requested file path
+  - `prefix`: The default prefix for the file
+  
+  **Returns:** The resolved file path
+  
+  ```tsx
+  <SwCanvas
+    width={800}
+    height={600}
+    locateFile={(path, prefix) => `/assets/wasm/${path}`}
+  >
+    {/* ... */}
+  </SwCanvas>
+  ```
+</ParamField>
+
+### Additional Props
+
+The `SwCanvas` component extends all standard HTML canvas element props (from `ComponentPropsWithoutRef<'canvas'>`), including:
+
+- `className`: CSS class name
+- `style`: Inline styles
+- `onClick`, `onMouseMove`, etc.: Event handlers
+- And all other standard canvas attributes
+
+## Advanced Examples
+
+### High-DPI Display Support
+
+```tsx
+<SwCanvas
+  width={800}
+  height={600}
+  devicePixelRatio={2}
+>
+  <Shape>
+    <circle cx={400} cy={300} r={100} />
+    <fill color="#e74c3c" />
+  </Shape>
+</SwCanvas>
+```
+
+### Custom WASM File Location
+
+```tsx
+import { SwCanvas } from 'react-thorvg-fiber';
+
+function App() {
+  const locateFile = (path: string, prefix: string) => {
+    // Load WASM files from a CDN
+    return `https://cdn.example.com/thorvg/${path}`;
+  };
+
+  return (
+    <SwCanvas
+      width={1920}
+      height={1080}
+      locateFile={locateFile}
+    >
+      {/* Your vector graphics */}
+    </SwCanvas>
+  );
+}
+```
+
+### Responsive Canvas with Event Handlers
+
+```tsx
+import { SwCanvas, Shape } from 'react-thorvg-fiber';
+import { useState } from 'react';
+
+function InteractiveCanvas() {
+  const [clicked, setClicked] = useState(false);
+
+  return (
+    <SwCanvas
+      width={800}
+      height={600}
+      onClick={() => setClicked(!clicked)}
+      style={{ border: '1px solid #ccc', cursor: 'pointer' }}
+    >
+      <Shape>
+        <rect x={300} y={250} width={200} height={100} />
+        <fill color={clicked ? '#2ecc71' : '#3498db'} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+## Type Signature
+
+```tsx
+interface SwCanvasCustomProps {
+  width: number;
+  height: number;
+  devicePixelRatio?: number;
+  locateFile?: (path: string, prefix: string) => string;
+}
+
+type SwCanvasProps = ComponentPropsWithoutRef<'canvas'> & SwCanvasCustomProps;
+
+const SwCanvas: FC<PropsWithChildren<SwCanvasProps>>;
+```
+
+## Implementation Details
+
+The `SwCanvas` component:
+
+1. **Initializes ThorVG**: Loads the WebAssembly module and creates a ThorVG engine instance
+2. **Creates Software Canvas**: Sets up a software rendering context with ABGR8888 color space
+3. **React Reconciler**: Establishes a custom React reconciler to handle declarative child components
+4. **Automatic Updates**: Updates the canvas whenever children or props change
+5. **Resource Cleanup**: Properly disposes of ThorVG resources on unmount
+
+### Performance Characteristics
+
+- **Rendering**: CPU-based, single-threaded
+- **Compatibility**: Works on all browsers supporting WebAssembly
+- **Memory**: Lower memory usage compared to GlCanvas
+- **Best for**: Simple to moderate complexity scenes with < 1000 shapes
+
+## See Also
+
+- [GlCanvas](/api/gl-canvas) - Hardware-accelerated WebGL canvas
+- [Shape](/api/shape) - Vector shape component
+- [Scene](/api/scene) - Container for grouping shapes

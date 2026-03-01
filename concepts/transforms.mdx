@@ -1,0 +1,327 @@
+---
+title: Transforms
+description: Positioning, rotating, and scaling shapes and scenes
+---
+
+Both `Shape` and `Scene` components support transformation properties that control positioning, rotation, and scaling.
+
+## Transform Props
+
+All transform props are optional and have sensible defaults. See the type definitions in the source code for the complete definition.
+
+<ParamField path="x" type="number" default="0">
+  X-axis translation in pixels. Moves the element horizontally.
+</ParamField>
+
+<ParamField path="y" type="number" default="0">
+  Y-axis translation in pixels. Moves the element vertically.
+</ParamField>
+
+<ParamField path="rotation" type="number" default="0">
+  Rotation angle in degrees. Positive values rotate clockwise.
+</ParamField>
+
+<ParamField path="scaleX" type="number" default="1">
+  Horizontal scale factor. Values > 1 enlarge, values < 1 shrink.
+</ParamField>
+
+<ParamField path="scaleY" type="number" default="1">
+  Vertical scale factor. Values > 1 enlarge, values < 1 shrink.
+</ParamField>
+
+## Translation (Position)
+
+Use `x` and `y` props to position elements:
+
+```tsx
+import { SwCanvas, Shape, Rect } from '@thorvg/react-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={400} height={300}>
+      <Shape fill={[255, 100, 100, 255]} x={50} y={50}>
+        <Rect x={0} y={0} width={100} height={100} />
+      </Shape>
+      
+      <Shape fill={[100, 100, 255, 255]} x={200} y={150}>
+        <Rect x={0} y={0} width={100} height={100} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+<Note>
+The `x` and `y` props on `Shape` are **separate** from the `x` and `y` props on geometry children like `Rect`. The Shape transform moves the entire shape, while geometry coordinates are relative to the shape's origin.
+</Note>
+
+## Rotation
+
+Rotate elements using the `rotation` prop (in degrees):
+
+```tsx
+<Shape 
+  fill={[200, 100, 255, 255]} 
+  x={150} 
+  y={150}
+  rotation={45}
+>
+  <Rect x={-50} y={-50} width={100} height={100} />
+</Shape>
+```
+
+<Tip>
+Rotation is applied around the element's origin (0, 0). To rotate around the center of a rectangle, position it with negative offsets equal to half its dimensions.
+</Tip>
+
+### Rotation Example: Spinning Square
+
+```tsx
+import { useState, useEffect } from 'react';
+import { SwCanvas, Shape, Rect } from '@thorvg/react-fiber';
+
+function SpinningSquare() {
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotation(r => (r + 2) % 360);
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <SwCanvas width={400} height={300}>
+      <Shape 
+        fill={[100, 200, 255, 255]}
+        x={200}
+        y={150}
+        rotation={rotation}
+      >
+        {/* Center the rect on the rotation point */}
+        <Rect x={-50} y={-50} width={100} height={100} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+## Scaling
+
+Scale elements using `scaleX` and `scaleY`:
+
+```tsx
+<Shape 
+  fill={[100, 255, 100, 255]}
+  x={100}
+  y={100}
+  scaleX={1.5}
+  scaleY={0.8}
+>
+  <Circle x={0} y={0} radius={50} />
+</Shape>
+```
+
+<CardGroup cols={2}>
+  <Card title="Uniform Scaling" icon="expand">
+    Use the same value for both `scaleX` and `scaleY` to scale proportionally.
+    
+    ```tsx
+    scaleX={2} scaleY={2}
+    ```
+  </Card>
+  
+  <Card title="Non-uniform Scaling" icon="arrows-left-right">
+    Use different values to stretch or squash in one direction.
+    
+    ```tsx
+    scaleX={2} scaleY={1}
+    ```
+  </Card>
+</CardGroup>
+
+## Transform Order
+
+Transforms are applied in a specific order: **Scale → Rotate → Translate**.
+
+This is implemented in the matrix utility in the source code:
+
+```typescript
+// Order: Scale -> Rotate -> Translate
+// Matrix multiplication: T * R * S
+```
+
+<Steps>
+  <Step title="Scale">
+    The element is first scaled by `scaleX` and `scaleY`.
+  </Step>
+  
+  <Step title="Rotate">
+    Then rotated by `rotation` degrees around the origin.
+  </Step>
+  
+  <Step title="Translate">
+    Finally moved to position `(x, y)`.
+  </Step>
+</Steps>
+
+## Combining Transforms
+
+You can combine all transform properties:
+
+```tsx
+<Shape 
+  fill={[255, 150, 50, 255]}
+  x={200}
+  y={150}
+  rotation={30}
+  scaleX={1.2}
+  scaleY={0.8}
+>
+  <Rect x={-50} y={-25} width={100} height={50} rx={5} ry={5} />
+</Shape>
+```
+
+## Transforms on Scenes
+
+`Scene` components support the same transform props and apply them to all children:
+
+```tsx
+import { SwCanvas, Scene, Shape, Rect, Circle } from '@thorvg/react-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={600} height={400}>
+      <Scene x={100} y={100} rotation={15} scaleX={1.5} scaleY={1.5}>
+        <Shape fill={[255, 100, 100, 255]}>
+          <Rect x={0} y={0} width={50} height={50} />
+        </Shape>
+        <Shape fill={[100, 100, 255, 255]}>
+          <Circle x={75} y={25} radius={25} />
+        </Shape>
+      </Scene>
+    </SwCanvas>
+  );
+}
+```
+
+<Note>
+Transforms on a `Scene` apply to all its children. Each child can also have its own transforms, which are combined with the parent's.
+</Note>
+
+## Nested Transforms
+
+Transforms accumulate when nesting `Scene` components:
+
+```tsx
+<Scene x={100} y={100} rotation={45}>
+  <Scene x={50} y={0} scaleX={2}>
+    <Shape fill={[200, 100, 200, 255]}>
+      <Rect x={0} y={0} width={30} height={30} />
+    </Shape>
+  </Scene>
+</Scene>
+```
+
+In this example:
+1. The inner Scene is positioned at (50, 0) relative to the outer Scene
+2. The inner Scene is scaled 2x
+3. The outer Scene rotates both scenes by 45 degrees
+4. The outer Scene moves everything to (100, 100)
+
+## Interactive Example: Draggable Shape
+
+```tsx
+import { useState } from 'react';
+import { SwCanvas, Shape, Circle } from '@thorvg/react-fiber';
+
+function DraggableCircle() {
+  const [position, setPosition] = useState({ x: 200, y: 150 });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleMouseDown = () => setIsDragging(true);
+  const handleMouseUp = () => setIsDragging(false);
+  
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDragging) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  return (
+    <div
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseMove={handleMouseMove}
+    >
+      <SwCanvas width={400} height={300}>
+        <Shape 
+          fill={[100, 200, 255, 255]}
+          x={position.x}
+          y={position.y}
+        >
+          <Circle x={0} y={0} radius={30} />
+        </Shape>
+      </SwCanvas>
+    </div>
+  );
+}
+```
+
+## Common Patterns
+
+<AccordionGroup>
+  <Accordion title="Center an element">
+    To center a rectangle, offset its geometry by half its dimensions:
+    
+    ```tsx
+    <Shape x={200} y={150} fill={[255,100,100,255]}>
+      <Rect x={-50} y={-50} width={100} height={100} />
+    </Shape>
+    ```
+  </Accordion>
+
+  <Accordion title="Rotate around center">
+    Position geometry so (0,0) is at the desired rotation point:
+    
+    ```tsx
+    <Shape x={200} y={150} rotation={45} fill={[100,255,100,255]}>
+      <Rect x={-60} y={-40} width={120} height={80} />
+    </Shape>
+    ```
+  </Accordion>
+
+  <Accordion title="Mirror horizontally">
+    Use negative scale:
+    
+    ```tsx
+    <Shape scaleX={-1} x={200} y={100} fill={[100,100,255,255]}>
+      <Circle x={0} y={0} radius={40} />
+    </Shape>
+    ```
+  </Accordion>
+
+  <Accordion title="Group and transform together">
+    Use a Scene to transform multiple shapes as one unit:
+    
+    ```tsx
+    <Scene x={150} y={100} rotation={30}>
+      <Shape fill={[255,0,0,255]}>
+        <Rect x={0} y={0} width={50} height={50} />
+      </Shape>
+      <Shape fill={[0,255,0,255]}>
+        <Circle x={60} y={25} radius={25} />
+      </Shape>
+    </Scene>
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+Remember that geometry coordinates (like `x` and `y` on `Rect`) are **separate** from transform props on `Shape`. Geometry coordinates define the shape itself, while transform props position and manipulate the entire shape.
+</Warning>

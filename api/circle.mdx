@@ -1,0 +1,140 @@
+---
+title: 'Circle'
+description: 'Circle and ellipse geometry component for defining circular shapes'
+---
+
+The Circle component defines circular or elliptical geometry within a Shape. It must always be a child of a [Shape](/api/shape) component.
+
+## Props
+
+<ParamField path="x" type="number" required>
+  X-coordinate of the circle's center point in pixels.
+</ParamField>
+
+<ParamField path="y" type="number" required>
+  Y-coordinate of the circle's center point in pixels.
+</ParamField>
+
+<ParamField path="radius" type="number">
+  Radius for a perfect circle in pixels.
+  
+  Use this for circular shapes. Cannot be used with `rx` or `ry`.
+</ParamField>
+
+<ParamField path="rx" type="number">
+  Horizontal radius for an ellipse in pixels.
+  
+  Use with `ry` to create elliptical shapes. Cannot be used with `radius`.
+</ParamField>
+
+<ParamField path="ry" type="number">
+  Vertical radius for an ellipse in pixels.
+  
+  Use with `rx` to create elliptical shapes. Cannot be used with `radius`.
+</ParamField>
+
+<Note>
+  You must provide either `radius` for a circle, or both `rx` and `ry` for an ellipse.
+</Note>
+
+## Usage
+
+### Basic Circle
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape fill={[255, 0, 0, 255]}>
+  <Circle x={100} y={100} radius={50} />
+</Shape>
+```
+
+### Ellipse
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape fill={[0, 255, 0, 255]}>
+  <Circle x={150} y={100} rx={80} ry={40} />
+</Shape>
+```
+
+### Circle with Stroke
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape
+  fill={[255, 255, 255, 255]}
+  stroke={[0, 0, 255, 255]}
+  strokeWidth={3}
+>
+  <Circle x={100} y={100} radius={50} />
+</Shape>
+```
+
+### Multiple Circles in One Shape
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape fill={[255, 200, 100, 180]}>
+  <Circle x={50} y={100} radius={30} />
+  <Circle x={150} y={100} radius={30} />
+  <Circle x={100} y={100} radius={20} />
+</Shape>
+```
+
+### Transparent Circle
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape
+  fill={[100, 200, 255, 255]}
+  opacity={128}
+>
+  <Circle x={100} y={100} radius={60} />
+</Shape>
+```
+
+### Elliptical Ring
+
+```tsx
+import { Shape, Circle } from 'react-thorvg-fiber';
+
+<Shape
+  fill={[255, 255, 255, 0]}
+  stroke={[255, 0, 0, 255]}
+  strokeWidth={5}
+>
+  <Circle x={150} y={100} rx={70} ry={50} />
+</Shape>
+```
+
+## Parent-Child Relationships
+
+- **Parent**: Must be a child of [Shape](/api/shape)
+- **Children**: Circle does not accept children
+
+<Warning>
+  A Circle component that is not a child of a Shape will not render.
+</Warning>
+
+<Info>
+  The position (`x`, `y`) represents the center point and is relative to the parent Shape's transform. If the Shape has `x={100}`, a Circle with `x={50}` will have its center at pixel position 150.
+</Info>
+
+## TypeScript Interface
+
+```typescript
+interface CircleProps {
+  x: number;
+  y: number;
+  radius?: number;
+  rx?: number;
+  ry?: number;
+}
+```
+
+Source: `packages/fiber/src/types.ts:173-198`

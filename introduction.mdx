@@ -1,0 +1,107 @@
+---
+title: Introduction
+description: A React renderer for ThorVG, enabling declarative 2D vector graphics with high-performance rendering powered by WebAssembly
+---
+
+# React ThorVG Fiber
+
+A React renderer for [ThorVG](https://www.thorvg.org/), enabling declarative 2D vector graphics with high-performance rendering powered by WebAssembly. This gives you the full performance of ThorVG in the browser, with the developer experience of React.
+
+## What is React ThorVG Fiber?
+
+React ThorVG Fiber brings the power of ThorVG's C++ vector graphics engine to React through WebAssembly. It provides a declarative API that feels natural to React developers while delivering native-level performance for 2D graphics rendering.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Get started with npm, yarn, pnpm, or bun
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Build your first vector graphic in minutes
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/sw-canvas">
+    Explore the complete API documentation
+  </Card>
+  <Card title="Examples" icon="palette" href="/examples/basic-shapes">
+    Learn from interactive examples
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<CardGroup cols={3}>
+  <Card title="Native Performance" icon="bolt">
+    ThorVG C++ library compiled to WebAssembly with custom JavaScript bindings for direct access to the powerful vector graphics engine
+  </Card>
+  <Card title="Declarative API" icon="react">
+    Build complex vector graphics using familiar React patterns with components, props, and hooks
+  </Card>
+  <Card title="Multiple Backends" icon="layer-group">
+    Choose between software rendering (Canvas 2D) or hardware-accelerated rendering (WebGL) based on your needs
+  </Card>
+  <Card title="TypeScript Support" icon="code">
+    Fully typed API with comprehensive TypeScript definitions for a great developer experience
+  </Card>
+  <Card title="Tree-Shakeable" icon="tree">
+    Import only what you need - modern ESM build with optimized bundle size
+  </Card>
+  <Card title="Production Ready" icon="check">
+    Battle-tested renderer built on React Reconciler with comprehensive test coverage
+  </Card>
+</CardGroup>
+
+## Architecture
+
+React ThorVG Fiber consists of two main layers:
+
+1. **Native ThorVG Bindings**: The ThorVG C++ library compiled to WebAssembly with custom JavaScript bindings, providing direct access to ThorVG's vector graphics engine
+
+2. **React Renderer**: A declarative React API built on React Reconciler that wraps the bindings, enabling you to build vector graphics with familiar React components
+
+<Info>
+  This architecture gives you the performance of native C++ code with the developer experience of React.
+</Info>
+
+## Simple Example
+
+Here's a quick taste of what React ThorVG Fiber looks like:
+
+```tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={400} height={400}>
+      <Shape fill={[59, 130, 246, 255]}>
+        <Circle x={200} y={200} radius={100} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+This renders a blue circle in the center of a 400x400 canvas using software rendering.
+
+## When to Use React ThorVG Fiber
+
+React ThorVG Fiber is ideal for:
+
+- **Data Visualizations**: Charts, graphs, and interactive data displays
+- **Animations**: Smooth, performant vector animations
+- **Interactive Graphics**: Games, drawing tools, and creative applications
+- **SVG-like Graphics**: When you need programmatic control over vector graphics
+- **High-Performance Rendering**: Complex scenes that benefit from WebAssembly performance
+
+<Warning>
+  React ThorVG Fiber requires WebAssembly support. Ensure your target browsers support WebAssembly and WebGL (for GlCanvas).
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Install the Package" icon="download" href="/installation">
+    Install react-thorvg-fiber in your project
+  </Card>
+  <Card title="Build Your First Graphic" icon="rocket" href="/quickstart">
+    Follow the quick start guide to create your first vector graphic
+  </Card>
+</CardGroup>

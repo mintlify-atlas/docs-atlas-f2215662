@@ -1,0 +1,415 @@
+---
+title: Scenes
+description: Grouping and composing shapes with the Scene component
+---
+
+The `Scene` component is a container that groups multiple shapes and other scenes together, allowing you to organize and transform them as a unit.
+
+## Basic Scene Usage
+
+Scenes act as groups that can contain `Shape` children:
+
+```tsx
+import { SwCanvas, Scene, Shape, Rect, Circle } from '@thorvg/react-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={600} height={400}>
+      <Scene>
+        <Shape fill={[255, 100, 100, 255]}>
+          <Rect x={50} y={50} width={100} height={100} />
+        </Shape>
+        <Shape fill={[100, 100, 255, 255]}>
+          <Circle x={200} y={100} radius={50} />
+        </Shape>
+      </Scene>
+    </SwCanvas>
+  );
+}
+```
+
+## Scene Props
+
+Scenes support transform properties and opacity. See the type definitions in the source code.
+
+<ParamField path="x" type="number" default="0">
+  X-axis translation in pixels.
+</ParamField>
+
+<ParamField path="y" type="number" default="0">
+  Y-axis translation in pixels.
+</ParamField>
+
+<ParamField path="rotation" type="number" default="0">
+  Rotation angle in degrees.
+</ParamField>
+
+<ParamField path="scaleX" type="number" default="1">
+  Horizontal scale factor.
+</ParamField>
+
+<ParamField path="scaleY" type="number" default="1">
+  Vertical scale factor.
+</ParamField>
+
+<ParamField path="opacity" type="number" default="255">
+  Opacity value from 0 (transparent) to 255 (opaque).
+</ParamField>
+
+## Why Use Scenes?
+
+<CardGroup cols={2}>
+  <Card title="Group Transforms" icon="object-group">
+    Apply transforms to multiple shapes at once without affecting their individual transforms.
+  </Card>
+  
+  <Card title="Organize Structure" icon="sitemap">
+    Create logical groupings for complex graphics, like UI components or illustration layers.
+  </Card>
+  
+  <Card title="Manage Opacity" icon="droplet">
+    Control opacity of multiple shapes together.
+  </Card>
+  
+  <Card title="Composition" icon="layer-group">
+    Build complex graphics from reusable scene components.
+  </Card>
+</CardGroup>
+
+## Transforming Scenes
+
+Transforms on a Scene apply to all its children:
+
+```tsx
+<SwCanvas width={500} height={400}>
+  <Scene x={100} y={100} rotation={15}>
+    <Shape fill={[255, 150, 100, 255]}>
+      <Rect x={0} y={0} width={80} height={80} />
+    </Shape>
+    <Shape fill={[100, 200, 255, 255]}>
+      <Circle x={100} y={40} radius={40} />
+    </Shape>
+  </Scene>
+</SwCanvas>
+```
+
+In this example, both shapes are positioned and rotated together as a group.
+
+## Nested Scenes
+
+Scenes can contain other scenes, creating a hierarchy:
+
+```tsx
+<SwCanvas width={600} height={400}>
+  <Scene x={50} y={50}>
+    <Shape fill={[255, 100, 100, 255]}>
+      <Rect x={0} y={0} width={100} height={100} />
+    </Shape>
+    
+    <Scene x={150} y={0} rotation={45}>
+      <Shape fill={[100, 255, 100, 255]}>
+        <Rect x={-25} y={-25} width={50} height={50} />
+      </Shape>
+      <Shape fill={[100, 100, 255, 255]}>
+        <Circle x={0} y={40} radius={20} />
+      </Shape>
+    </Scene>
+  </Scene>
+</SwCanvas>
+```
+
+Transforms accumulate through the hierarchy - the inner scene's position and rotation are relative to its parent scene.
+
+<Note>
+Nested scenes are useful for creating complex compositions where different parts need independent transforms that also move together as a larger group.
+</Note>
+
+## Scene Opacity
+
+Control the opacity of all children at once:
+
+```tsx
+import { useState } from 'react';
+import { SwCanvas, Scene, Shape, Rect, Circle } from '@thorvg/react-fiber';
+
+function FadingGroup() {
+  const [opacity, setOpacity] = useState(255);
+
+  return (
+    <div>
+      <SwCanvas width={400} height={300}>
+        <Scene opacity={opacity}>
+          <Shape fill={[255, 100, 100, 255]}>
+            <Rect x={50} y={50} width={100} height={100} />
+          </Shape>
+          <Shape fill={[100, 100, 255, 255]}>
+            <Circle x={150} y={100} radius={50} />
+          </Shape>
+        </Scene>
+      </SwCanvas>
+      
+      <input 
+        type="range" 
+        min="0" 
+        max="255" 
+        value={opacity}
+        onChange={e => setOpacity(Number(e.target.value))}
+      />
+    </div>
+  );
+}
+```
+
+<Tip>
+Scene opacity is multiplied with the opacity of individual shapes. If a scene has opacity 128 (50%) and a child shape has opacity 128, the resulting opacity is 25%.
+</Tip>
+
+## Reusable Scene Components
+
+Scenes enable component-based composition:
+
+```tsx
+import { Scene, Shape, Rect, Circle } from '@thorvg/react-fiber';
+
+function House({ x, y, color }: { x: number; y: number; color: [number, number, number, number] }) {
+  return (
+    <Scene x={x} y={y}>
+      {/* House body */}
+      <Shape fill={color}>
+        <Rect x={0} y={20} width={60} height={50} />
+      </Shape>
+      
+      {/* Roof */}
+      <Shape fill={[150, 75, 0, 255]}>
+        <Path 
+          commands={[PathCommand.MoveTo, PathCommand.LineTo, PathCommand.LineTo, PathCommand.Close]}
+          points={[
+            { x: 30, y: 0 },
+            { x: 0, y: 20 },
+            { x: 60, y: 20 }
+          ]}
+        />
+      </Shape>
+      
+      {/* Window */}
+      <Shape fill={[200, 220, 255, 255]}>
+        <Rect x={20} y={35} width={20} height={20} />
+      </Shape>
+    </Scene>
+  );
+}
+
+function Village() {
+  return (
+    <SwCanvas width={600} height={400}>
+      <House x={50} y={100} color={[200, 100, 100, 255]} />
+      <House x={150} y={120} color={[100, 150, 200, 255]} />
+      <House x={280} y={90} color={[150, 200, 100, 255]} />
+    </SwCanvas>
+  );
+}
+```
+
+## Dynamic Scenes
+
+Scenes work seamlessly with React's dynamic rendering:
+
+```tsx
+import { useState } from 'react';
+import { SwCanvas, Scene, Shape, Circle } from '@thorvg/react-fiber';
+
+function DynamicDots() {
+  const [dots, setDots] = useState([
+    { x: 100, y: 100, color: [255, 0, 0, 255] as [number, number, number, number] },
+    { x: 200, y: 150, color: [0, 255, 0, 255] as [number, number, number, number] },
+  ]);
+
+  const addDot = () => {
+    setDots(prev => [
+      ...prev,
+      {
+        x: Math.random() * 400,
+        y: Math.random() * 300,
+        color: [
+          Math.floor(Math.random() * 255),
+          Math.floor(Math.random() * 255),
+          Math.floor(Math.random() * 255),
+          255
+        ] as [number, number, number, number]
+      }
+    ]);
+  };
+
+  return (
+    <div>
+      <SwCanvas width={400} height={300}>
+        <Scene>
+          {dots.map((dot, i) => (
+            <Shape key={i} fill={dot.color} x={dot.x} y={dot.y}>
+              <Circle x={0} y={0} radius={20} />
+            </Shape>
+          ))}
+        </Scene>
+      </SwCanvas>
+      <button onClick={addDot}>Add Dot</button>
+    </div>
+  );
+}
+```
+
+## Scene Order and Layering
+
+Shapes and scenes are rendered in the order they appear in the component tree. Later children are drawn on top:
+
+```tsx
+<SwCanvas width={400} height={300}>
+  {/* This red square is drawn first (bottom layer) */}
+  <Shape fill={[255, 0, 0, 255]} x={50} y={50}>
+    <Rect x={0} y={0} width={100} height={100} />
+  </Shape>
+  
+  {/* This blue circle is drawn second (middle layer) */}
+  <Shape fill={[0, 0, 255, 255]} x={100} y={100}>
+    <Circle x={0} y={0} radius={60} />
+  </Shape>
+  
+  {/* This green square is drawn last (top layer) */}
+  <Shape fill={[0, 255, 0, 255]} x={150} y={150}>
+    <Rect x={0} y={0} width={100} height={100} />
+  </Shape>
+</SwCanvas>
+```
+
+<Note>
+Scenes follow the same layering rules - shapes within later scenes appear on top of shapes in earlier scenes.
+</Note>
+
+## Performance Considerations
+
+Scenes are implemented efficiently in the reconciler (the reconciler implementation):
+
+```typescript
+if (parentInstance.scene && childInstance.paint) {
+  parentInstance.scene.push(childInstance.paint);
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Lightweight" icon="feather">
+    Scenes have minimal overhead - they're simple containers in the rendering tree.
+  </Card>
+  
+  <Card title="Efficient Updates" icon="bolt">
+    Only changed properties trigger re-renders, not the entire scene.
+  </Card>
+</CardGroup>
+
+## Common Patterns
+
+<AccordionGroup>
+  <Accordion title="Component Library">
+    Create reusable graphic components using Scenes:
+    
+    ```tsx
+    function Button({ x, y, label }: { x: number; y: number; label: string }) {
+      return (
+        <Scene x={x} y={y}>
+          <Shape fill={[100, 150, 255, 255]}>
+            <Rect x={0} y={0} width={120} height={40} rx={5} ry={5} />
+          </Shape>
+          {/* Add text rendering when available */}
+        </Scene>
+      );
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Animated Groups">
+    Animate entire groups by animating the Scene transform:
+    
+    ```tsx
+    function AnimatedGroup() {
+      const [rotation, setRotation] = useState(0);
+      
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setRotation(r => (r + 1) % 360);
+        }, 16);
+        return () => clearInterval(interval);
+      }, []);
+      
+      return (
+        <Scene x={200} y={150} rotation={rotation}>
+          <Shape fill={[255,100,100,255]}>
+            <Rect x={-50} y={-20} width={100} height={40} />
+          </Shape>
+          <Shape fill={[100,100,255,255]}>
+            <Circle x={0} y={0} radius={10} />
+          </Shape>
+        </Scene>
+      );
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Conditional Rendering">
+    Show/hide entire groups:
+    
+    ```tsx
+    function ConditionalScene({ showDetails }: { showDetails: boolean }) {
+      return (
+        <SwCanvas width={400} height={300}>
+          <Shape fill={[255,100,100,255]}>
+            <Rect x={50} y={50} width={100} height={100} />
+          </Shape>
+          
+          {showDetails && (
+            <Scene x={200} y={100}>
+              <Shape fill={[100,200,100,255]}>
+                <Circle x={0} y={0} radius={30} />
+              </Shape>
+              <Shape fill={[100,100,200,255]}>
+                <Rect x={50} y={-15} width={60} height={30} />
+              </Shape>
+            </Scene>
+          )}
+        </SwCanvas>
+      );
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Layout Systems">
+    Build layout helpers using Scenes:
+    
+    ```tsx
+    function HStack({ children, spacing = 10, x = 0, y = 0 }: {
+      children: React.ReactNode[];
+      spacing?: number;
+      x?: number;
+      y?: number;
+    }) {
+      return (
+        <Scene x={x} y={y}>
+          {React.Children.map(children, (child, i) => (
+            <Scene x={i * spacing} y={0}>
+              {child}
+            </Scene>
+          ))}
+        </Scene>
+      );
+    }
+    
+    // Usage:
+    <HStack spacing={120} x={50} y={100}>
+      <Shape fill={[255,0,0,255]}><Rect width={100} height={100} /></Shape>
+      <Shape fill={[0,255,0,255]}><Circle radius={50} /></Shape>
+      <Shape fill={[0,0,255,255]}><Rect width={100} height={100} /></Shape>
+    </HStack>
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+Scenes can only contain `Shape` components and other `Scene` components. They cannot directly contain geometry children like `Rect`, `Circle`, or `Path`.
+</Warning>

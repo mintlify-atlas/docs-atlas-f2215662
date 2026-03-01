@@ -1,0 +1,195 @@
+---
+title: Basic Shapes
+description: Examples of rectangles, circles, ellipses, and basic styling with React ThorVG Fiber
+---
+
+## Simple Rectangle
+
+Create a basic rectangle using the `Shape` and `Rect` components. The `fill` prop accepts an RGBA color array where each value is 0-255.
+
+```tsx
+import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[59, 130, 246, 255]}>
+    <Rect x={50} y={50} width={100} height={100} />
+  </Shape>
+</SwCanvas>
+```
+
+This creates a blue rectangle at position (50, 50) with dimensions 100x100 pixels.
+
+## Circle
+
+Draw a perfect circle using the `Circle` component with the `radius` prop.
+
+```tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[234, 88, 12, 255]}>
+    <Circle x={100} y={100} radius={50} />
+  </Shape>
+</SwCanvas>
+```
+
+This creates an orange circle centered at (100, 100) with a radius of 50 pixels.
+
+## Ellipse
+
+Create an ellipse by using different horizontal and vertical radii with `rx` and `ry` props.
+
+```tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[34, 197, 94, 255]}>
+    <Circle x={100} y={100} rx={70} ry={40} />
+  </Shape>
+</SwCanvas>
+```
+
+This creates a green ellipse centered at (100, 100) with a horizontal radius of 70 and vertical radius of 40.
+
+## Rounded Rectangle
+
+Add rounded corners to rectangles using the `rx` and `ry` props.
+
+<Tabs items={['Equal Radii', 'Different Radii']}>
+  <Tab value="Equal Radii">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]}>
+        <Rect x={50} y={50} width={100} height={100} rx={20} ry={20} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Creates a rectangle with equally rounded corners (20px radius).
+  </Tab>
+  
+  <Tab value="Different Radii">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[168, 85, 247, 255]}>
+        <Rect x={50} y={50} width={100} height={100} rx={40} ry={10} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    Creates a rectangle with asymmetric rounded corners - more rounded horizontally (40px) than vertically (10px).
+  </Tab>
+</Tabs>
+
+## Fill and Stroke
+
+Combine fill and stroke colors to create outlined shapes.
+
+<Tabs items={['Fill Only', 'Stroke Only', 'Fill and Stroke']}>
+  <Tab value="Fill Only">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape fill={[59, 130, 246, 255]}>
+        <Rect x={50} y={50} width={100} height={100} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    A solid filled rectangle with no outline.
+  </Tab>
+  
+  <Tab value="Stroke Only">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape stroke={[234, 88, 12, 255]} strokeWidth={4}>
+        <Rect x={50} y={50} width={100} height={100} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    An outlined rectangle with no fill.
+  </Tab>
+  
+  <Tab value="Fill and Stroke">
+    ```tsx
+    import { SwCanvas, Shape, Rect } from 'react-thorvg-fiber';
+
+    <SwCanvas width={200} height={200}>
+      <Shape
+        fill={[59, 130, 246, 255]}
+        stroke={[234, 88, 12, 255]}
+        strokeWidth={8}
+      >
+        <Rect x={50} y={50} width={100} height={100} />
+      </Shape>
+    </SwCanvas>
+    ```
+    
+    A blue rectangle with an orange 8px outline.
+  </Tab>
+</Tabs>
+
+## Multiple Shapes
+
+Combine multiple shapes in a single canvas.
+
+```tsx
+import { SwCanvas, Shape, Circle, Rect } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[59, 130, 246, 255]}>
+    <Rect x={30} y={30} width={60} height={60} />
+  </Shape>
+  <Shape fill={[234, 88, 12, 255]}>
+    <Circle x={130} y={60} radius={30} />
+  </Shape>
+  <Shape fill={[34, 197, 94, 255]}>
+    <Rect x={110} y={110} width={60} height={60} rx={10} ry={10} />
+  </Shape>
+</SwCanvas>
+```
+
+This example creates a composition with a blue square, orange circle, and green rounded rectangle.
+
+## Using GlCanvas
+
+All examples can also use `GlCanvas` for hardware-accelerated rendering.
+
+```tsx
+import { GlCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+<GlCanvas width={200} height={200} locateFile={() => '/path/to/thorvg-gl.wasm'}>
+  <Shape fill={[234, 88, 12, 255]}>
+    <Circle x={100} y={100} radius={50} />
+  </Shape>
+</GlCanvas>
+```
+
+The API is identical to `SwCanvas`, but `GlCanvas` uses WebGL for rendering and requires a `locateFile` function to load the WASM module.
+
+## Opacity
+
+Control transparency with the `opacity` prop (0-255, where 255 is fully opaque).
+
+```tsx
+import { SwCanvas, Shape, Circle } from 'react-thorvg-fiber';
+
+<SwCanvas width={200} height={200}>
+  <Shape fill={[234, 88, 12, 255]} opacity={255}>
+    <Circle x={80} y={100} radius={40} />
+  </Shape>
+  <Shape fill={[59, 130, 246, 255]} opacity={128}>
+    <Circle x={120} y={100} radius={40} />
+  </Shape>
+</SwCanvas>
+```
+
+This creates two overlapping circles - one fully opaque (255) and one semi-transparent (128).

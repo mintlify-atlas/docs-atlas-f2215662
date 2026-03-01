@@ -1,0 +1,207 @@
+---
+title: Canvas Types
+description: Understanding SwCanvas and GlCanvas rendering backends
+---
+
+React ThorVG Fiber provides two canvas components for rendering vector graphics: `SwCanvas` for CPU-based software rendering and `GlCanvas` for GPU-accelerated WebGL rendering.
+
+## SwCanvas (Software Rendering)
+
+`SwCanvas` uses CPU-based rendering, providing maximum compatibility across platforms and browsers.
+
+```tsx
+import { SwCanvas, Shape, Rect } from '@thorvg/react-fiber';
+
+function App() {
+  return (
+    <SwCanvas width={800} height={600}>
+      <Shape fill={[255, 0, 0, 255]}>
+        <Rect x={100} y={100} width={200} height={150} />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+### SwCanvas Props
+
+<ParamField path="width" type="number" required>
+  Width of the canvas in CSS pixels.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the canvas in CSS pixels.
+</ParamField>
+
+<ParamField path="devicePixelRatio" type="number" default="window.devicePixelRatio">
+  Device pixel ratio for high-DPI displays. Automatically defaults to the window's pixel ratio.
+</ParamField>
+
+<ParamField path="locateFile" type="(path: string, prefix: string) => string">
+  Optional function to customize WebAssembly file paths. Useful for CDN configurations.
+</ParamField>
+
+### When to Use SwCanvas
+
+<CardGroup cols={2}>
+  <Card title="Maximum Compatibility" icon="circle-check">
+    Works on all browsers and devices without WebGL support requirements.
+  </Card>
+  <Card title="Simple Graphics" icon="shapes">
+    Best for basic vector graphics with moderate complexity.
+  </Card>
+  <Card title="Static Content" icon="image">
+    Ideal for graphics that don't require frequent updates.
+  </Card>
+  <Card title="Predictable Performance" icon="gauge">
+    CPU-based rendering provides consistent, predictable performance.
+  </Card>
+</CardGroup>
+
+## GlCanvas (WebGL Rendering)
+
+`GlCanvas` uses GPU-accelerated WebGL rendering for better performance with complex scenes.
+
+```tsx
+import { GlCanvas, Shape, Circle } from '@thorvg/react-fiber';
+
+function App() {
+  return (
+    <GlCanvas id="my-canvas" width={800} height={600}>
+      <Shape fill={[0, 128, 255, 255]}>
+        <Circle x={400} y={300} radius={100} />
+      </Shape>
+    </GlCanvas>
+  );
+}
+```
+
+### GlCanvas Props
+
+<ParamField path="id" type="string" required>
+  Required unique identifier for the canvas element. Used by WebGL context to bind to the canvas.
+</ParamField>
+
+<ParamField path="width" type="number" required>
+  Width of the canvas in CSS pixels.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height of the canvas in CSS pixels.
+</ParamField>
+
+<ParamField path="devicePixelRatio" type="number" default="window.devicePixelRatio">
+  Device pixel ratio for high-DPI displays.
+</ParamField>
+
+<ParamField path="locateFile" type="(path: string, prefix: string) => string">
+  Optional function to customize WebAssembly file paths.
+</ParamField>
+
+### When to Use GlCanvas
+
+<CardGroup cols={2}>
+  <Card title="Complex Graphics" icon="layer-group">
+    Better performance for scenes with many shapes and complex paths.
+  </Card>
+  <Card title="Animations" icon="play">
+    GPU acceleration provides smoother animations and frequent updates.
+  </Card>
+  <Card title="High Performance" icon="rocket">
+    Offloads rendering to GPU for faster processing.
+  </Card>
+  <Card title="Modern Browsers" icon="browser">
+    Requires WebGL support (available in all modern browsers).
+  </Card>
+</CardGroup>
+
+## Key Differences
+
+<AccordionGroup>
+  <Accordion title="Rendering Backend">
+    - **SwCanvas**: CPU-based software rendering using Canvas 2D API
+    - **GlCanvas**: GPU-accelerated rendering using WebGL
+  </Accordion>
+
+  <Accordion title="Performance Characteristics">
+    - **SwCanvas**: Linear performance degradation with complexity. Best for simple to moderate graphics.
+    - **GlCanvas**: Better performance with complex scenes due to GPU parallelization.
+  </Accordion>
+
+  <Accordion title="Browser Compatibility">
+    - **SwCanvas**: Works on all browsers, including older ones without WebGL
+    - **GlCanvas**: Requires WebGL support (available in all modern browsers since ~2015)
+  </Accordion>
+
+  <Accordion title="Required Props">
+    - **SwCanvas**: Only requires `width` and `height`
+    - **GlCanvas**: Requires `width`, `height`, and a unique `id`
+  </Accordion>
+
+  <Accordion title="Color Space">
+    - **SwCanvas**: Uses `ABGR8888` (premultiplied alpha)
+    - **GlCanvas**: Uses `ABGR8888S` (straight alpha)
+  </Accordion>
+</AccordionGroup>
+
+## Choosing the Right Canvas
+
+<Steps>
+  <Step title="Assess Your Requirements">
+    Consider the complexity of your graphics, target browsers, and performance needs.
+  </Step>
+  
+  <Step title="Start with SwCanvas">
+    For most use cases, SwCanvas provides excellent compatibility and sufficient performance.
+  </Step>
+  
+  <Step title="Upgrade to GlCanvas if Needed">
+    If you experience performance issues with complex scenes or animations, switch to GlCanvas.
+  </Step>
+</Steps>
+
+<Tip>
+Both canvas types share the same API for child components (Shape, Scene, Rect, Circle, Path), making it easy to switch between them.
+</Tip>
+
+## Example: Responsive Canvas
+
+```tsx
+import { useState, useEffect } from 'react';
+import { SwCanvas, Shape, Rect } from '@thorvg/react-fiber';
+
+function ResponsiveCanvas() {
+  const [size, setSize] = useState({ width: 800, height: 600 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return (
+    <SwCanvas width={size.width} height={size.height}>
+      <Shape fill={[100, 200, 255, 255]}>
+        <Rect 
+          x={size.width / 2 - 100} 
+          y={size.height / 2 - 100} 
+          width={200} 
+          height={200} 
+        />
+      </Shape>
+    </SwCanvas>
+  );
+}
+```
+
+<Warning>
+Changing the `width` or `height` props will reinitialize the canvas. For frequent resizing, consider using CSS transforms or fixed internal dimensions with viewport-relative positioning.
+</Warning>
